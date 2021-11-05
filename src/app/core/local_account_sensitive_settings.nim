@@ -1,4 +1,4 @@
-import NimQml, os
+import NimQml, os, json
 
 import ../../constants
 
@@ -134,7 +134,7 @@ QtObject:
 
   # float type must be exposed through QVariant property.
   proc getSettingsPropQVariant(self: LocalAccountSensitiveSettings, prop: string, default: QVariant): QVariant =
-    result = if(self.settings.isNil): newQVariant() else: self.settings.value(prop, default)
+    result = if(self.settings.isNil): default else: self.settings.value(prop, default)
 
   proc getSettingsPropString(self: LocalAccountSensitiveSettings, prop: string, default: QVariant): string =
     result = if(self.settings.isNil): "" else: self.settings.value(prop, default).stringVal
@@ -489,7 +489,8 @@ QtObject:
   
   proc whitelistedUnfurlingSitesChanged*(self: LocalAccountSensitiveSettings) {.signal.}
   proc getWhitelistedUnfurlingSites*(self: LocalAccountSensitiveSettings): QVariant {.slot.} =
-    getSettingsPropQVariant(self, LSS_KEY_WITHLISTED_UNFURLING_SITES, newQVariant())
+    echo "Getting stuff"
+    getSettingsPropQVariant(self, LSS_KEY_WITHLISTED_UNFURLING_SITES, newQVariant(newJObject()))
   proc setWhitelistedUnfurlingSites*(self: LocalAccountSensitiveSettings, value: QVariant) {.slot.} =
     setSettingsProp(self, LSS_KEY_WITHLISTED_UNFURLING_SITES, value):
       self.whitelistedUnfurlingSitesChanged()
