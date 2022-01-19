@@ -55,3 +55,6 @@ method clear*(self: ServiceInterface) {.base.} =
 
 method generateAlias*(self: ServiceInterface, publicKey: string): string {.base.} =
   raise newException(ValueError, "No implementation available")
+
+method setDefaultSyncPeriod*(self: ServiceInterface) {.base.} =
+  raise newException(ValueError, "No implementation available")

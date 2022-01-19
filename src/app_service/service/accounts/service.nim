@@ -6,6 +6,8 @@ import ./dto/accounts
 import ./dto/generated_accounts
 import status/statusgo_backend_new/accounts as status_go
 import status/statusgo_backend_new/general as status_go_general
+import status/statusgo_backend_new/settings as status_go_settings
+from status/types/setting import Setting
 
 import ../../common/[account_constants, utils, string_utils]
 import ../../../constants as main_constants
@@ -316,3 +318,7 @@ method login*(self: Service, account: AccountDto, password: string): string =
   except Exception as e:
     error "error: ", methodName="setupAccount", errName = e.name, errDesription = e.msg
     return e.msg
+
+method setDefaultSyncPeriod*(self: Service) =
+  if self.isFirstTimeAccountLogin:
+    status_go_settings.saveSettings($Setting.DefaultSyncPeriod, 31*86400) # 31 days

@@ -53,6 +53,8 @@ method init*(self: Controller) =
     singletonInstance.localAccountSettings.removeKey(LS_KEY_STORE_TO_KEYCHAIN)
     self.delegate.emitStoringPasswordError(args.errDescription)
 
+  self.accountsService.setDefaultSyncPeriod()
+
 method getCommunities*(self: Controller): seq[community_service.CommunityDto] =
   return self.communityService.getCommunities()
 
