@@ -134,8 +134,8 @@ QtObject:
     # Response of `transactionService.getPendingTransactions()` should be appropriate DTO, that's not added at the moment
     # but once we add it, need to update this block here, since we won't need to parse json manually here.
     let pendingTransactions = self.transactionService.getPendingTransactions()
-    if (pendingTransactions.len > 0):
-      for trx in pendingTransactions.parseJson{"result"}.getElems():
+    if (pendingTransactions.kind == JArray and pendingTransactions.len > 0):
+      for trx in pendingTransactions.getElems():
         let transactionType = trx["type"].getStr
         if transactionType == $PendingTransactionTypeDto.RegisterENS or
           transactionType == $PendingTransactionTypeDto.SetPubKey:
