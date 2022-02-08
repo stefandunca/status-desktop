@@ -109,7 +109,7 @@ method setPubKey*(self: Module, ensUsername: string, address: string, gas: strin
   var success: bool
   if(not responseObj.getProp("success", success) or not success):
     info "remote call is not executed with success", methodName="setPubKey"
-    return
+    return response
   
   var respResult: string
   if(responseObj.getProp("result", respResult)):
@@ -191,7 +191,7 @@ method registerEns*(self: Module, ensUsername: string, address: string, gas: str
     return
 
   var respResult: string
-  if(responseObj.getProp("result", respResult)):
+  if(responseObj.getProp("result", respResult) and responseObj{"success"}.getBool == true):
     self.view.model().addItem(Item(ensUsername: ensUsername, isPending: true))
     self.view.emitTransactionWasSentSignal(respResult)
 

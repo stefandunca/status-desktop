@@ -105,6 +105,7 @@ Item {
         StatusETHTransactionModal {
             ensUsernamesStore: root.ensUsernamesStore
             contactsStore: root.contactsStore
+            ensUsername: root.username
             onOpened: {
                 root.ensUsernamesStore.fetchGasPrice()
             }
