@@ -56,6 +56,7 @@ QtObject:
     contactsStatus: Table[string, StatusUpdateDto] # [contact_id, StatusUpdateDto]
     events: EventEmitter
     closingApp: bool
+    imageServerUrl: string
 
   # Forward declaration
   proc getContactById*(self: Service, id: string): ContactsDto
@@ -119,7 +120,17 @@ QtObject:
           let data = ContactArgs(contactId: c.id)
           self.events.emit(SIGNAL_CONTACT_UPDATED, data)
 
+  proc setImageServerUrl(self: Service) =
+    try:
+      let response = status_contacts.getImageServerURL()
+      self.imageServerUrl = response.result.getStr()
+    except Exception as e:
+      let errDesription = e.msg
+      error "error: ", errDesription
+      return
+
   proc init*(self: Service) =
+    self.setImageServerUrl()
     self.fetchContacts()
     self.doConnect()
     self.startCheckingContactStatuses()
@@ -178,7 +189,7 @@ QtObject:
     result = self.fetchContact(id)
     if result.id.len == 0:
       let alias = self.generateAlias(id)
-      let identicon = self.generateIdenticon(id)
+      let identicon = self.imageServerUrl & "identicons?publicKey=" & id
       result = ContactsDto(
         id: id,
         identicon: identicon,
