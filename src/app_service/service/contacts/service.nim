@@ -37,6 +37,8 @@ const CheckStatusIntervalInMilliseconds = 5000 # 5 seconds, this is timeout how 
 const OnlineLimitInSeconds = int(5.5 * 60) # 5.5 minutes
 const IdleLimitInSeconds = int(7 * 60) # 7 minutes
 
+const identiconURLParam = "identicons?publicKey="
+
 # Signals which may be emitted by this service:
 const SIGNAL_ENS_RESOLVED* = "ensResolved"
 const SIGNAL_CONTACT_ADDED* = "contactAdded"
@@ -178,7 +180,7 @@ QtObject:
     if(publicKey.len == 0):
       error "cannot generate an identicon from the empty public key"
       return 
-    return status_accounts.generateIdenticon(publicKey).result.getStr
+    return self.imageServerUrl & identiconURLParam & publicKey
 
   proc getContactById*(self: Service, id: string): ContactsDto =
     ## Returns contact details based on passed id (public key)
@@ -189,7 +191,7 @@ QtObject:
     result = self.fetchContact(id)
     if result.id.len == 0:
       let alias = self.generateAlias(id)
-      let identicon = self.imageServerUrl & "identicons?publicKey=" & id
+      let identicon = self.imageServerUrl & identiconURLParam & id
       result = ContactsDto(
         id: id,
         identicon: identicon,
