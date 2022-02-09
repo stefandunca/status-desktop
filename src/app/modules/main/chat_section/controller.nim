@@ -11,6 +11,7 @@ import ../../../../app_service/service/message/service as message_service
 import ../../../../app_service/service/gif/service as gif_service
 import ../../../../app_service/service/mailservers/service as mailservers_service
 
+import ../../../global/app_signals
 import ../../../core/eventemitter
 
 export controller_interface
@@ -239,15 +240,8 @@ method getCurrentFleet*(self: Controller): string =
 method getContacts*(self: Controller): seq[ContactsDto] =
   return self.contactService.getContacts()
 
-method getContact*(self: Controller, id: string): ContactsDto =
-  return self.contactService.getContactById(id)
-
 method getContactDetails*(self: Controller, id: string): ContactDetails =
   return self.contactService.getContactDetails(id)
-
-method getContactNameAndImage*(self: Controller, contactId: string):
-  tuple[name: string, image: string, isIdenticon: bool] =
-  return self.contactService.getContactNameAndImage(contactId)
 
 method addContact*(self: Controller, publicKey: string) =
   self.contactService.addContact(publicKey)
@@ -358,3 +352,6 @@ method reorderCommunityCategories*(self: Controller, categoryId: string, positio
 
 method reorderCommunityChat*(self: Controller, categoryId: string, chatId: string, position: int): string =
   self.communityService.reorderCommunityChat(self.sectionId, categoryId, chatId, position)
+
+method getRenderedText*(self: Controller, parsedTextArray: seq[ParsedText]): string =
+  return self.messageService.getRenderedText(parsedTextArray)
