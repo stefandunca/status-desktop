@@ -662,7 +662,5 @@ method osNotificationClicked*[T](self: Module[T], details: NotificationDetails) 
 method newCommunityMembershipRequestReceived*[T](self: Module[T], membershipRequest: CommunityMembershipRequestDto) =
   let (contactName, _, _) = self.controller.getContactNameAndImage(membershipRequest.publicKey)
   let community =  self.controller.getCommunityById(membershipRequest.communityId)
-  echo "contactName: ", repr(contactName)
-  echo "community: ", repr(community)
   singletonInstance.globalEvents.newCommunityMembershipRequestNotification("New membership request",
   fmt "{contactName} asks to join {community.name}", community.id)

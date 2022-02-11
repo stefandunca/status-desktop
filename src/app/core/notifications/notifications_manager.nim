@@ -51,17 +51,17 @@ QtObject:
 
     signalConnect(self.osNotification, "notificationClicked(QString)", self, "onOSNotificationClicked(QString)", 2)
     signalConnect(singletonInstance.globalEvents, "showNormalMessageNotification(QString, QString, QString, QString, QString)", 
-    self, "onShowNormalMessageNotification(QString, QString, QString, QString, QString)", 2)
+      self, "onShowNormalMessageNotification(QString, QString, QString, QString, QString)", 2)
     signalConnect(singletonInstance.globalEvents, "showMentionMessageNotification(QString, QString, QString, QString, QString)", 
-    self, "onShowMentionMessageNotification(QString, QString, QString, QString, QString)", 2)
+      self, "onShowMentionMessageNotification(QString, QString, QString, QString, QString)", 2)
     signalConnect(singletonInstance.globalEvents, "showNewContactRequestNotification(QString, QString, QString)", 
-    self, "onShowNewContactRequestNotification(QString, QString, QString)", 2)
+      self, "onShowNewContactRequestNotification(QString, QString, QString)", 2)
     signalConnect(singletonInstance.globalEvents, "newCommunityMembershipRequestNotification(QString, QString, QString)", 
-    self, "onNewCommunityMembershipRequestNotification(QString, QString, QString)", 2)
+      self, "onNewCommunityMembershipRequestNotification(QString, QString, QString)", 2)
     signalConnect(singletonInstance.globalEvents, "myRequestToJoinCommunityHasBeenAcccepted(QString, QString, QString)", 
-    self, "onMyRequestToJoinCommunityHasBeenAcccepted(QString, QString, QString)", 2)
+      self, "onMyRequestToJoinCommunityHasBeenAcccepted(QString, QString, QString)", 2)
     signalConnect(singletonInstance.globalEvents, "myRequestToJoinCommunityHasBeenRejected(QString, QString, QString)", 
-    self, "onMyRequestToJoinCommunityHasBeenRejected(QString, QString, QString)", 2)
+      self, "onMyRequestToJoinCommunityHasBeenRejected(QString, QString, QString)", 2)
 
   proc delete*(self: NotificationsManager) =
     self.osNotification.delete
