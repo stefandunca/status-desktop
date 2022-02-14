@@ -48,11 +48,12 @@ type
 const SIGNAL_STICKER_PACK_LOADED* = "stickerPackLoaded"
 const SIGNAL_ALL_STICKER_PACKS_LOADED* = "allStickerPacksLoaded"
 const SIGNAL_STICKER_GAS_ESTIMATED* = "stickerGasEstimated"
+const SIGNAL_INSTALLED_STICKER_PACKS_LOADED* = "installedStickerPacksLoaded"
 
 QtObject:
   type Service* = ref object of QObject
     threadpool: ThreadPool
-    availableStickerPacks*: Table[int, StickerPackDto]
+    marketStickerPacks*: Table[string, StickerPackDto]
     purchasedStickerPacks*: seq[int]
     recentStickers*: seq[StickerDto]
     events: EventEmitter
@@ -64,7 +65,7 @@ QtObject:
     chatService: chat_service.Service
 
   # Forward declaration
-  proc obtainAvailableStickerPacks*(self: Service)
+  proc obtainMarketStickerPacks*(self: Service)
 
   proc delete*(self: Service) =
     self.QObject.delete
@@ -89,47 +90,27 @@ QtObject:
     result.transactionService = transactionService
     result.networkService = networkService
     result.chatService = chatService
-    result.availableStickerPacks = initTable[int, StickerPackDto]()
+    result.marketStickerPacks = initTable[string, StickerPackDto]()
     result.purchasedStickerPacks = @[]
     result.recentStickers = @[]
 
+  proc getInstalledStickerPacks*(self: Service): Table[string, StickerPackDto] =
+    result = initTable[string, StickerPackDto]()
+    try:
+      let installedResponse = status_stickers.installed()
+      for (packID, stickerPackJson) in installedResponse.result.pairs():
+        result[packID] = stickerPackJson.toStickerPackDto()
+    except RpcException:
+      error "Error obtaining installed stickers", message = getCurrentExceptionMsg()
+    
   proc init*(self: Service) =
-    self.obtainAvailableStickerPacks()
     # TODO redo the connect check when the network is refactored
     # if self.status.network.isConnected:
-    #   self.obtainAvailableStickerPacks()
-    # else:
-    #   let installedStickerPacks = self.getInstalledStickerPacks()
-    #   self.delegate.populateInstalledStickerPacks(installedStickerPacks) # use emit instead
+    self.obtainMarketStickerPacks() # TODO: rename this to obtain sticker market items
 
-  proc getInstalledStickerPacks*(self: Service): Table[int, StickerPackDto] =
-    self.settingsService.getInstalledStickerPacks()
-
-  proc buildTransaction(
-      self: Service,
-      packId: Uint256,
-      address: Address,
-      price: Uint256,
-      approveAndCall: var ApproveAndCall[100],
-      sntContract: var Erc20ContractDto,
-      gas = "",
-      gasPrice = "",
-      isEIP1559Enabled = false,
-      maxPriorityFeePerGas = "",
-      maxFeePerGas = ""
-      ): TransactionDataDto =
-    let networkType = self.settingsService.getCurrentNetwork().toNetworkType()
-    let network = self.networkService.getNetwork(networkType)
-    sntContract = self.eth_service.findErc20Contract(network.chainId, network.sntSymbol())
-    let
-      stickerMktContract = self.eth_service.findContract(network.chainId, "sticker-market")
-      buyToken = BuyToken(packId: packId, address: address, price: price)
-      buyTxAbiEncoded = stickerMktContract.methods["buyToken"].encodeAbi(buyToken)
-    approveAndCall = ApproveAndCall[100](to: stickerMktContract.address, value: price, data: DynamicBytes[100].fromHex(buyTxAbiEncoded))
-    ens_utils.buildTokenTransaction(address, sntContract.address, gas, gasPrice, isEIP1559Enabled, maxPriorityFeePerGas, maxFeePerGas)
-
-  proc buyPack*(self: Service, packId: int, address, price, gas, gasPrice: string, isEIP1559Enabled: bool, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string, success: var bool): string =
-    var
+  proc buyPack*(self: Service, packId: string, address, price, gas, gasPrice: string, isEIP1559Enabled: bool, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string, success: var bool): string =
+    discard # TODO:
+    #[var
       sntContract: Erc20ContractDto
       approveAndCall: ApproveAndCall[100]
       tx = self.buildTransaction(
@@ -153,9 +134,9 @@ QtObject:
         $sntContract.address,
         $PendingTransactionTypeDto.BuyStickerPack,
         $packId
-      )
+      )]#
 
-  proc buy*(self: Service, packId: int, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
+  proc buy*(self: Service, packId: string, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
     let eip1559Enabled = self.settingsService.isEIP1559Enabled()
 
     try:
@@ -240,10 +221,9 @@ QtObject:
       error "Error getting purchased sticker packs", message = getCurrentExceptionMsg()
       result = @[]
 
-  proc setAvailableStickerPacks*(self: Service, availableStickersJSON: string) {.slot.} =
+  proc setMarketStickerPacks*(self: Service, availableStickersJSON: string) {.slot.} =
     let
       accounts = self.walletAccountService.getWalletAccounts() # TODO: make generic
-      installedStickerPacks = self.getInstalledStickerPacks()
     var
       purchasedStickerPacks: seq[int]
     for account in accounts:
@@ -258,32 +238,27 @@ QtObject:
           pendingStickerPacks.incl(trx["additionalData"].getStr.parseInt)
 
     for stickerPack in availableStickers:
-      let isInstalled = installedStickerPacks.hasKey(stickerPack.id)
-      let isBought = purchasedStickerPacks.contains(stickerPack.id)
-      let isPending = pendingStickerPacks.contains(stickerPack.id) and not isBought
-      self.availableStickerPacks[stickerPack.id] = stickerPack
+      #let isBought = purchasedStickerPacks.contains(stickerPack.id)
+     # let isPending = pendingStickerPacks.contains(stickerPack.id) and not isBought
+      let isBought = false
+      let isPending = false
+      self.marketStickerPacks[stickerPack.id] = stickerPack
       self.events.emit(SIGNAL_STICKER_PACK_LOADED, StickerPackLoadedArgs(
         stickerPack: stickerPack,
-        isInstalled: isInstalled,
+        isInstalled: false,
         isBought: isBought,
         isPending: isPending
       ))
     self.events.emit(SIGNAL_ALL_STICKER_PACKS_LOADED, Args())
 
-  proc obtainAvailableStickerPacks*(self: Service) =
-    let networkType = self.settingsService.getCurrentNetwork().toNetworkType()
-    let network = self.networkService.getNetwork(networkType)
-    let contract = self.eth_service.findContract(network.chainId, "stickers")
-    if (contract == nil):
-      return
+  proc obtainMarketStickerPacks*(self: Service) =
+    let chainId = self.settingsService.getCurrentNetworkId()
 
-    let arg = ObtainAvailableStickerPacksTaskArg(
-      tptr: cast[ByteAddress](obtainAvailableStickerPacksTask),
+    let arg = obtainMarketStickerPacksTaskArg(
+      tptr: cast[ByteAddress](obtainMarketStickerPacksTask),
       vptr: cast[ByteAddress](self.vptr),
-      slot: "setAvailableStickerPacks",
-      contract: contract,
-      packCountMethod: contract.methods["packCount"],
-      getPackDataMethod: contract.methods["getPackData"],
+      slot: "setMarketStickerPacks",
+      chainId: chainId,
       running: cast[ByteAddress](addr self.threadpool.running)
     )
     self.threadpool.start(arg)
@@ -295,83 +270,59 @@ QtObject:
   # the [T] here is annoying but the QtObject template only allows for one type
   # definition so we'll need to setup the type, task, and helper outside of body
   # passed to `QtObject:`
-  proc estimate*(self: Service, packId: int, address: string, price: string, uuid: string) =
-    var
-      approveAndCall: ApproveAndCall[100]
-      networkType = self.settingsService.getCurrentNetwork().toNetworkType()
-      network = self.networkService.getNetwork(networkType)
-      sntContract = self.eth_service.findErc20Contract(network.chainId, network.sntSymbol())
-      tx = self.buildTransaction(
-        packId.u256,
-        status_utils.parseAddress(address),
-        status_utils.eth2Wei(parseFloat(price), sntContract.decimals),
-        approveAndCall,
-        sntContract
-      )
-
-    var estimateData = sntContract.methods["approveAndCall"]
-      .getEstimateGasData(tx, approveAndCall)
+  proc estimate*(self: Service, packId: string, address: string, price: string, uuid: string) =
+    let chainId = self.settingsService.getCurrentNetworkId()
 
     let arg = EstimateTaskArg(
       tptr: cast[ByteAddress](estimateTask),
       vptr: cast[ByteAddress](self.vptr),
       slot: "setGasEstimate",
+      packId: packId,
       uuid: uuid,
-      data: estimateData
+      chainId: chainId,
+      fromAddress: address
     )
     self.threadpool.start(arg)
 
   proc addStickerToRecent*(self: Service, sticker: StickerDto, save: bool = false) =
-    self.recentStickers.insert(sticker, 0)
-    self.recentStickers = self.recentStickers.deduplicate()
-    if self.recentStickers.len > 24:
-      self.recentStickers = self.recentStickers[0..23] # take top 24 most recent
-    if save:
-      discard self.settingsService.saveRecentStickers(self.recentStickers)
+    try:
+      discard status_stickers.addRecent(sticker.packId, sticker.hash)
+    except RpcException:
+      error "Error adding recent sticker", message = getCurrentExceptionMsg()
 
-  proc getPackIdForSticker*(packs: Table[int, StickerPackDto], hash: string): int =
+  proc getPackIdForSticker*(packs: Table[string, StickerPackDto], hash: string): string =
     for packId, pack in packs.pairs:
       if pack.stickers.any(proc(sticker: StickerDto): bool = return sticker.hash == hash):
         return packId
-    return 0
+    return "0"
 
   proc getRecentStickers*(self: Service): seq[StickerDto] =
-    # TODO: this should be a custom `readValue` implementation of nim-json-serialization
-    let recentStickers = self.settingsService.getRecentStickers()
-    let installedStickers = self.getInstalledStickerPacks()
-    var stickers = newSeq[StickerDto]()
-    for hash in recentStickers:
-      # pack id is not returned from status-go settings, populate here
-      let packId = getPackIdForSticker(installedStickers, hash)
-      # .insert instead of .add to effectively reverse the order stickers because
-      # stickers are re-reversed when added to the view due to the nature of
-      # inserting recent stickers at the front of the list
-      stickers.insert(StickerDto(hash: hash, packId: packId), 0)
-
-    for sticker in stickers:
-      self.addStickerToRecent(sticker)
-
-    result = self.recentStickers
+    try:
+      let recentResponse = status_stickers.recent()
+      for stickerJson in recentResponse.result:
+        result = stickerJson.toStickerDto() & result
+    except RpcException:
+      error "Error obtaining installed stickers", message = getCurrentExceptionMsg()
 
   proc getNumInstalledStickerPacks*(self: Service): int =
-    return self.settingsService.getInstalledStickerPacks().len
+    try:
+      let installedResponse = status_stickers.installed()
+      return installedResponse.result.len
+    except RpcException:
+      error "Error obtaining installed stickers", message = getCurrentExceptionMsg()
+    return 0
 
-  proc installStickerPack*(self: Service, packId: int) =
-    if not self.availableStickerPacks.hasKey(packId):
+  proc installStickerPack*(self: Service, packId: string) =
+    let chainId = self.settingsService.getCurrentNetworkId()
+    if not self.marketStickerPacks.hasKey(packId):
       return
-    let pack = self.availableStickerPacks[packId]
-    var installedStickerPacks = self.settingsService.getInstalledStickerPacks()
-    installedStickerPacks[packId] = pack
-
-    discard self.settingsService.saveRecentStickers(installedStickerPacks)
-
-  proc uninstallStickerPack*(self: Service, packId: int) =
-    var installedStickerPacks = self.settingsService.getInstalledStickerPacks()
-    if not installedStickerPacks.hasKey(packId):
-      return
-    installedStickerPacks.del(packId)
-
-    discard self.settingsService.saveRecentStickers(installedStickerPacks)
+    let installResponse = status_stickers.install(chainId, packId)
+    
+  proc uninstallStickerPack*(self: Service, packId: string) =
+    try:
+      let installedResponse = status_stickers.uninstall(packId)
+    except RpcException:
+      error "Error removing installed sticker", message = getCurrentExceptionMsg()
 
   proc sendSticker*(
       self: Service,
@@ -389,9 +340,8 @@ QtObject:
         sticker.hash,
         sticker.packId)
     discard self.chatService.processMessageUpdateAfterSend(response)
+    self.addStickerToRecent(sticker)
 
-    self.addStickerToRecent(sticker, true)
-
-  proc removeRecentStickers*(self: Service, packId: int) =
+  proc removeRecentStickers*(self: Service, packId: string) =
     self.recentStickers.keepItIf(it.packId != packId)
     discard self.settingsService.saveRecentStickers(self.recentStickers)

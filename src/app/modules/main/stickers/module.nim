@@ -43,28 +43,28 @@ method viewDidLoad*[T](self: Module[T]) =
   self.moduleLoaded = true
   self.delegate.stickersDidLoad()
 
-method buy*[T](self: Module[T], packId: int, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
+method buy*[T](self: Module[T], packId: string, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
   return self.controller.buy(packId, address, price, gas, gasPrice, maxPriorityFeePerGas, maxFeePerGas, password)
 
-method getInstalledStickerPacks*[T](self: Module[T]): Table[int, StickerPackDto] =
+method getInstalledStickerPacks*[T](self: Module[T]): Table[string, StickerPackDto] =
   self.controller.getInstalledStickerPacks()
 
 method getPurchasedStickerPacks*[T](self: Module[T], address: string): seq[int] =
   self.controller.getPurchasedStickerPacks(address)
 
-method obtainAvailableStickerPacks*[T](self: Module[T]) =
-  self.controller.obtainAvailableStickerPacks()
+method obtainMarketStickerPacks*[T](self: Module[T]) =
+  self.controller.obtainMarketStickerPacks()
 
 method getNumInstalledStickerPacks*[T](self: Module[T]): int =
   self.controller.getNumInstalledStickerPacks()
 
-method installStickerPack*[T](self: Module[T], packId: int) =
+method installStickerPack*[T](self: Module[T], packId: string) =
   self.controller.installStickerPack(packId)
 
-method uninstallStickerPack*[T](self: Module[T], packId: int) =
+method uninstallStickerPack*[T](self: Module[T], packId: string) =
   self.controller.uninstallStickerPack(packId)
 
-method removeRecentStickers*[T](self: Module[T], packId: int) =
+method removeRecentStickers*[T](self: Module[T], packId: string) =
   self.controller.removeRecentStickers(packId)
 
 method decodeContentHash*[T](self: Module[T], hash: string): string =
@@ -81,11 +81,11 @@ method sendSticker*[T](self: Module[T], channelId: string, replyTo: string, stic
     stickerDto,
     singletonInstance.userProfile.getEnsName())
 
-method estimate*[T](self: Module[T], packId: int, address: string, price: string, uuid: string) =
+method estimate*[T](self: Module[T], packId: string, address: string, price: string, uuid: string) =
   self.controller.estimate(packId, address, price, uuid)
 
 method addRecentStickerToList*[T](self: Module[T], sticker: StickerDto) =
-  self.view.addRecentStickerToList(initItem(sticker.hash, sticker.packId))
+  self.view.addRecentStickerToList(initItem(sticker.hash, sticker.packId, sticker.url))
 
 method clearStickerPacks*[T](self: Module[T]) =
   self.view.clearStickerPacks()
@@ -93,7 +93,7 @@ method clearStickerPacks*[T](self: Module[T]) =
 method allPacksLoaded*[T](self: Module[T]) =
   self.view.allPacksLoaded()
 
-method populateInstalledStickerPacks*[T](self: Module[T], stickers: Table[int, StickerPackDto]) =
+method populateInstalledStickerPacks*[T](self: Module[T], stickers: Table[string, StickerPackDto]) =
   var stickerPackItems: seq[PackItem] = @[]
   for stickerPack in stickers.values:
     stickerPackItems.add(initPackItem(
@@ -102,10 +102,9 @@ method populateInstalledStickerPacks*[T](self: Module[T], stickers: Table[int, S
       stickerPack.author,
       stickerPack.price,
       stickerPack.preview,
-      stickerPack.stickers.map(s => initItem(s.hash, s.packId)),
+      stickerPack.stickers.map(s => initItem(s.hash, s.packId, s.url)),
       stickerPack.thumbnail
     ))
-
   self.view.populateInstalledStickerPacks(stickerPackItems)
 
 method gasEstimateReturned*[T](self: Module[T], estimate: int, uuid: string) =
@@ -118,7 +117,7 @@ method addStickerPackToList*[T](self: Module[T], stickerPack: StickerPackDto, is
           stickerPack.author,
           stickerPack.price,
           stickerPack.preview,
-          stickerPack.stickers.map(s => initItem(s.hash, s.packId)),
+          stickerPack.stickers.map(s => initItem(s.hash, s.packId, s.url)),
           stickerPack.thumbnail
         )
   self.view.addStickerPackToList(stickerPackItem, isInstalled, isBought, isPending)

@@ -50,7 +50,7 @@ Item {
                 height: 220
                 width: parent.width
                 radius: 12
-                source: "https://ipfs.infura.io/ipfs/" + model.preview
+                source: model.preview
                 onClicked: {
                     stickerPackDetailsPopup.open()
                 }

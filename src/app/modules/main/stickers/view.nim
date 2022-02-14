@@ -2,6 +2,7 @@ import NimQml, json, strutils, json_serialization
 
 import ./models/[sticker_list, sticker_pack_list]
 import ./io_interface, ./item
+import ../../../../app_service/service/eth/utils as eth_utils
 
 QtObject:
   type
@@ -51,19 +52,21 @@ QtObject:
 
   proc transactionCompleted*(self: View, success: bool, txHash: string, revertReason: string = "") {.signal.}
 
-  proc estimate*(self: View, packId: int, address: string, price: string, uuid: string) {.slot.} =
+  proc estimate*(self: View, packId: string, address: string, price: string, uuid: string) {.slot.} =
     self.delegate.estimate(packId, address, price, uuid)
 
   proc gasEstimateReturned*(self: View, estimate: int, uuid: string) {.signal.}
 
-  proc buy*(self: View, packId: int, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): string {.slot.} =
+  proc buy*(self: View, packId: string, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): string {.slot.} =
+    discard
+    #[
     let responseTuple = self.delegate.buy(packId, address, price, gas, gasPrice, maxPriorityFeePerGas, maxFeePerGas, password)
     let response = responseTuple.response
     let success = responseTuple.success
     if success:
       self.stickerPacks.updateStickerPackInList(packId, false, true)
       self.transactionWasSent(response)
-
+]#
   proc stickerPacksLoaded*(self: View) {.signal.}
 
   proc installedStickerPacksUpdated*(self: View) {.signal.}
@@ -82,15 +85,15 @@ QtObject:
     read = getNumInstalledStickerPacks
     notify = installedStickerPacksUpdated
 
-  proc install*(self: View, packId: int) {.slot.} =
+  proc install*(self: View, packId: string) {.slot.} =
     self.delegate.installStickerPack(packId)
     self.stickerPacks.updateStickerPackInList(packId, true, false)
     self.installedStickerPacksUpdated()
 
-  proc resetBuyAttempt*(self: View, packId: int) {.slot.} =
+  proc resetBuyAttempt*(self: View, packId: string) {.slot.} =
     self.stickerPacks.updateStickerPackInList(packId, false, false)
 
-  proc uninstall*(self: View, packId: int) {.slot.} =
+  proc uninstall*(self: View, packId: string) {.slot.} =
     self.delegate.uninstallStickerPack(packId)
     self.delegate.removeRecentStickers(packId)
     self.stickerPacks.updateStickerPackInList(packId, false, false)
@@ -113,8 +116,8 @@ QtObject:
     self.stickerPacksLoaded()
     self.installedStickerPacksUpdated()
 
-  proc send*(self: View, channelId: string, hash: string, replyTo: string, pack: int) {.slot.} =
-    let sticker = initItem(hash, pack)
+  proc send*(self: View, channelId: string, hash: string, replyTo: string, pack: string) {.slot.} =
+    let sticker = initItem(hash, pack, eth_utils.decodeContentHash(hash))
     self.addRecentStickerToList(sticker)
     self.delegate.sendSticker(channelId, replyTo, sticker)
 

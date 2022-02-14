@@ -16,8 +16,8 @@ type
     stickerService: stickers_service.Service
 
 # Forward declaration
-method obtainAvailableStickerPacks*[T](self: Controller[T])
-method getInstalledStickerPacks*[T](self: Controller[T]): Table[int, StickerPackDto]
+method obtainMarketStickerPacks*[T](self: Controller[T])
+method getInstalledStickerPacks*[T](self: Controller[T]): Table[string, StickerPackDto]
 
 proc newController*[T](
     delegate: io_interface.AccessInterface,
@@ -37,14 +37,19 @@ method init*[T](self: Controller[T]) =
   for sticker in recentStickers:
     self.delegate.addRecentStickerToList(sticker)
 
+  let installedStickers = self.stickerService.getInstalledStickerPacks()
+  self.delegate.populateInstalledStickerPacks(installedStickers)
+
   self.events.on("network:disconnected") do(e: Args):
     self.delegate.clearStickerPacks()
     let installedStickerPacks = self.getInstalledStickerPacks()
     self.delegate.populateInstalledStickerPacks(installedStickerPacks)
 
   self.events.on("network:connected") do(e: Args):
+    let installedStickers = self.stickerService.getInstalledStickerPacks()
+    self.delegate.populateInstalledStickerPacks(installedStickers)
     self.delegate.clearStickerPacks()
-    self.obtainAvailableStickerPacks()
+    self.obtainMarketStickerPacks()
 
   self.events.on(SIGNAL_STICKER_PACK_LOADED) do(e: Args):
     let args = StickerPackLoadedArgs(e)
@@ -62,31 +67,31 @@ method init*[T](self: Controller[T]) =
     let args = StickerGasEstimatedArgs(e)
     self.delegate.gasEstimateReturned(args.estimate, args.uuid)
 
-method buy*[T](self: Controller[T], packId: int, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
+method buy*[T](self: Controller[T], packId: string, address: string, price: string, gas: string, gasPrice: string, maxPriorityFeePerGas: string, maxFeePerGas: string, password: string): tuple[response: string, success: bool] =
   self.stickerService.buy(packId, address, price, gas, gasPrice, maxPriorityFeePerGas, maxFeePerGas, password)
 
-method estimate*[T](self: Controller[T], packId: int, address: string, price: string, uuid: string) =
+method estimate*[T](self: Controller[T], packId: string, address: string, price: string, uuid: string) =
   self.stickerService.estimate(packId, address, price, uuid)
 
-method getInstalledStickerPacks*[T](self: Controller[T]): Table[int, StickerPackDto] =
+method getInstalledStickerPacks*[T](self: Controller[T]): Table[string, StickerPackDto] =
   self.stickerService.getInstalledStickerPacks()
 
 method getPurchasedStickerPacks*[T](self: Controller[T], address: string): seq[int] =
   self.stickerService.getPurchasedStickerPacks(address)
 
-method obtainAvailableStickerPacks*[T](self: Controller[T]) =
-  self.stickerService.obtainAvailableStickerPacks()
+method obtainMarketStickerPacks*[T](self: Controller[T]) =
+  self.stickerService.obtainMarketStickerPacks()
 
 method getNumInstalledStickerPacks*[T](self: Controller[T]): int =
   self.stickerService.getNumInstalledStickerPacks()
 
-method installStickerPack*[T](self: Controller[T], packId: int) =
+method installStickerPack*[T](self: Controller[T], packId: string) =
   self.stickerService.installStickerPack(packId)
 
-method uninstallStickerPack*[T](self: Controller[T], packId: int) =
+method uninstallStickerPack*[T](self: Controller[T], packId: string) =
   self.stickerService.uninstallStickerPack(packId)
 
-method removeRecentStickers*[T](self: Controller[T], packId: int) =
+method removeRecentStickers*[T](self: Controller[T], packId: string) =
   self.stickerService.removeRecentStickers(packId)
 
 method sendSticker*[T](

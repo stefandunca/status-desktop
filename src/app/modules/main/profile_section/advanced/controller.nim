@@ -50,7 +50,7 @@ method changeCurrentNetworkTo*(self: Controller, network: string) =
     error "an error occurred, we couldn't reset stickers for the network"
     return
 
-  let stickerPacks = initTable[int, StickerPackDto]()
+  let stickerPacks = initTable[string, StickerPackDto]()
   if (not self.settingsService.saveRecentStickers(stickerPacks)):
     # in the future we may do a call from here to show a popup about this error
     error "an error occurred, we couldn't reset stickers packs for the network"

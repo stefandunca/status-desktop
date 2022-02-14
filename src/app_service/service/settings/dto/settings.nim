@@ -112,8 +112,6 @@ type
     walletVisibleTokens*: WalletVisibleTokens
     nodeConfig*: JsonNode
     wakuBloomFilterMode*: bool
-    recentStickerHashes*: seq[string]
-    installedStickerPacks*: Table[int, StickerPackDto]
     autoMessageEnabled*: bool
     gifRecents*: JsonNode
     gifFavorites*: JsonNode
@@ -172,21 +170,6 @@ proc toSettingsDto*(jsonObj: JsonNode): SettingsDto =
     if(networksArr.kind == JArray):
       for networkObj in networksArr:
         result.availableNetworks.add(toNetwork(networkObj))
-
-  var installedStickerPacksArr: JsonNode
-  if(jsonObj.getProp(KEY_INSTALLED_STICKER_PACKS, installedStickerPacksArr)):
-    if(installedStickerPacksArr.kind == JObject):
-      result.installedStickerPacks = initTable[int, StickerPackDto]()
-      for i in installedStickerPacksArr.keys:
-        let packId = parseInt(i)
-        result.installedStickerPacks[packId] = installedStickerPacksArr[i].toStickerPackDto
-
-
-  var recentStickersArr: JsonNode
-  if(jsonObj.getProp(KEY_RECENT_STICKERS, recentStickersArr)):
-    if(recentStickersArr.kind == JArray):
-      for stickerHash in recentStickersArr:
-        result.recentStickerHashes.add(stickerHash.getStr)
 
   discard jsonObj.getProp(KEY_DAPPS_ADDRESS, result.dappsAddress)
   discard jsonObj.getProp(KEY_EIP1581_ADDRESS, result.eip1581Address)

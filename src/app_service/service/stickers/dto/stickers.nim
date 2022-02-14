@@ -7,10 +7,11 @@ include ../../../common/utils
 
 type StickerDto* = object
   hash*: string
-  packId*: int
+  packId*: string
+  url*: string
 
 type StickerPackDto* = object
-  id*: int
+  id*: string
   name*: string
   author*: string
   price*: Stuint[256]
@@ -55,16 +56,18 @@ proc readValue*(reader: var JsonReader, value: var Stuint[256])
 proc toStickerDto*(jsonObj: JsonNode): StickerDto =
   result = StickerDto()
   discard jsonObj.getProp("hash", result.hash)
-  discard jsonObj.getProp("packId", result.packId)
+  discard jsonObj.getProp("packID", result.packId)
+  discard jsonObj.getProp("url", result.url)
 
 proc toStickerPackDto*(jsonObj: JsonNode): StickerPackDto =
   result = StickerPackDto()
   discard jsonObj.getProp("id", result.id)
   discard jsonObj.getProp("name", result.name)
   discard jsonObj.getProp("author", result.author)
-  result.price = stint.fromHex(Stuint[256], jsonObj["price"].getStr)
+  discard jsonObj.getProp("preview", result.preview)
   discard jsonObj.getProp("thumbnail", result.thumbnail)
 
+  result.price = jsonObj["price"].getStr().parse(Stuint[256])
   result.stickers = @[]
   for sticker in jsonObj["stickers"]:
     result.stickers.add(sticker.toStickerDto)
