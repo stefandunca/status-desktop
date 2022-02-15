@@ -29,7 +29,7 @@ StatusAppThreePanelLayout {
     property bool hasAddedContacts: root.contactsStore.myContactsModel.count > 0
 
     // Not Refactored
-   property var messageStore
+    property var messageStore
 
    property RootStore rootStore: RootStore {
       contactsStore: root.contactsStore
@@ -41,17 +41,17 @@ StatusAppThreePanelLayout {
     signal openAppSearch()
 
     // Not Refactored
-//    Connections {
-//        target: root.rootStore.chatsModelInst.stickers
-//        onStickerPacksLoaded: {
-//            stickersLoaded = true;
-//        }
-//    }
+    //    Connections {
+    //        target: root.rootStore.chatsModelInst.stickers
+    //        onStickerPacksLoaded: {
+    //            stickersLoaded = true;
+    //        }
+    //    }
 
-//    property var onActivated: function () {
-//        root.rootStore.chatsModelInst.channelView.restorePreviousActiveChannel();
-//        chatColumn.onActivated();
-//    }
+    //    property var onActivated: function () {
+    //        root.rootStore.chatsModelInst.channelView.restorePreviousActiveChannel();
+    //        chatColumn.onActivated();
+    //    }
 
     leftPanel: Loader {
         id: contactColumnLoader
@@ -60,20 +60,28 @@ StatusAppThreePanelLayout {
                              contactsColumnComponent
     }
 
-    centerPanel: ChatColumnView {
-        id: chatColumn
-        parentModule: root.rootStore.chatCommunitySectionModule
-        rootStore: root.rootStore
-        contactsStore: root.contactsStore
-        chatSectionModule: root.rootStore.chatCommunitySectionModule
-        pinnedMessagesPopupComponent: root.pinnedMessagesListPopupComponent
-        stickersLoaded: root.stickersLoaded
-        //chatGroupsListViewCount: contactColumnLoader.item.chatGroupsListViewCount
-        onOpenStickerPackPopup: {
-            Global.openPopup(statusStickerPackClickPopup, {packId: stickerPackId} )
+    centerPanel: Item {
+        anchors.fill: parent
+        ChatColumnView {
+            id: chatColumn
+            parentModule: root.rootStore.chatCommunitySectionModule
+            rootStore: root.rootStore
+            contactsStore: root.contactsStore
+            chatSectionModule: root.rootStore.chatCommunitySectionModule
+            pinnedMessagesPopupComponent: root.pinnedMessagesListPopupComponent
+            stickersLoaded: root.stickersLoaded
+            //chatGroupsListViewCount: contactColumnLoader.item.chatGroupsListViewCount
+            onOpenStickerPackPopup: {
+                Global.openPopup(statusStickerPackClickPopup, {packId: stickerPackId} )
+            }
+            onOpenAppSearch: {
+                root.openAppSearch()
+            }
         }
-        onOpenAppSearch: {
-            root.openAppSearch()
+
+        CreateChatView {
+            activeChatId: chatColumn.activeChatId
+            rootStore: root.rootStore
         }
     }
 

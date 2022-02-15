@@ -509,7 +509,7 @@ method onCommunityChannelEdited*(self: Module, chat: ChatDto) =
     return
   self.view.chatsModel().updateItemDetails(chat.id, chat.name, chat.description)
 
-method createOneToOneChat*(self: Module, chatId: string, ensName: string) =
+method createOneToOneChat*(self: Module, communityID: string, chatId: string, ensName: string) =
   if(self.controller.isCommunity()):
     debug "creating an one to one chat is not allowed for community, most likely it's an error in qml", methodName="createOneToOneChat"
     return
@@ -518,7 +518,7 @@ method createOneToOneChat*(self: Module, chatId: string, ensName: string) =
     self.setActiveItemSubItem(chatId, "")
     return
 
-  self.controller.createOneToOneChat(chatId, ensName)
+  self.controller.createOneToOneChat(communityID, chatId, ensName)
 
 method leaveChat*(self: Module, chatId: string) =
   self.controller.leaveChat(chatId)
@@ -549,7 +549,7 @@ method getCurrentFleet*(self: Module): string =
 
 method acceptContactRequest*(self: Module, publicKey: string) =
   self.controller.addContact(publicKey)
-  self.createOneToOneChat(publicKey, ensName = "")
+  self.createOneToOneChat(communityID = "" , publicKey, ensName = "")
 
 method onContactAccepted*(self: Module, publicKey: string) =
   self.view.contactRequestsModel().removeItemWithPubKey(publicKey)
@@ -599,20 +599,20 @@ method onNewMessagesReceived*(self: Module, chatId: string, unviewedMessagesCoun
     return
   self.updateNotifications(chatId, unviewedMessagesCount, unviewedMentionsCount)
 
-method addGroupMembers*(self: Module, chatId: string, pubKeys: string) =
-  self.controller.addGroupMembers(chatId, self.convertPubKeysToJson(pubKeys))
+method addGroupMembers*(self: Module, communityID: string, chatId: string, pubKeys: string) =
+  self.controller.addGroupMembers(communityID, chatId, self.convertPubKeysToJson(pubKeys))
 
-method removeMemberFromGroupChat*(self: Module, chatId: string, pubKey: string) =
-  self.controller.removeMemberFromGroupChat(chatId, pubKey)
+method removeMemberFromGroupChat*(self: Module, communityID: string, chatId: string, pubKey: string) =
+  self.controller.removeMemberFromGroupChat(communityID, chatId, pubKey)
 
-method renameGroupChat*(self: Module, chatId: string, newName: string) =
-  self.controller.renameGroupChat(chatId, newName)
+method renameGroupChat*(self: Module, communityID: string, chatId: string, newName: string) =
+  self.controller.renameGroupChat(communityID, chatId, newName)
 
-method makeAdmin*(self: Module, chatId: string, pubKey: string) =
-  self.controller.makeAdmin(chatId, pubKey)
+method makeAdmin*(self: Module, communityID: string, chatId: string, pubKey: string) =
+  self.controller.makeAdmin(communityID, chatId, pubKey)
 
-method createGroupChat*(self: Module, groupName: string, pubKeys: string) =
-  self.controller.createGroupChat(groupName, self.convertPubKeysToJson(pubKeys))
+method createGroupChat*(self: Module, communityID: string, groupName: string, pubKeys: string) =
+  self.controller.createGroupChat(communityID, groupName, self.convertPubKeysToJson(pubKeys))
 
 method joinGroup*(self: Module) =
   self.controller.joinGroup()

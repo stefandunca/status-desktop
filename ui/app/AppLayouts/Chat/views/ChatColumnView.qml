@@ -52,7 +52,6 @@ Item {
     property bool stickersLoaded: false
     property Timer timer: Timer { }
     property var userList
-
     property var contactDetails: Utils.getContactDetailsAsJson(root.activeChatId)
     property bool isContact: root.contactDetails.isContact
     property bool contactRequestReceived: root.contactDetails.requestReceived
@@ -196,8 +195,10 @@ Item {
                             return 0
 
                         let myChatId = chatContentModule.getMyChatId()
-                        if(myChatId === root.activeChatId || myChatId === root.activeSubItemId)
-                            return parent.height
+                        if (myChatId === root.activeChatId || myChatId === root.activeSubItemId) {
+                            root.rootStore.chatTextInput = textInputField.textInput;
+                            return parent.height;
+                        }
 
                         return 0
                     }
@@ -211,6 +212,11 @@ Item {
                     Component.onCompleted: {
                         parentModule.prepareChatContentModuleForChatId(itemId)
                         chatContentModule = parentModule.getChatContentModule()
+                        if (root.rootStore.openCreateChat) {
+                            root.rootStore.openCreateChat = false;
+                            textInputField.textInput.insert(0, root.rootStore.createChatInitMessage);
+                            textInputField.sendMessage(Qt.Key_Enter);
+                        }
                     }
                 }
             }

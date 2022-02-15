@@ -57,136 +57,40 @@ Item {
         text: qsTrId("chat")
     }
 
-    Item {
+    RowLayout {
         id: searchInputWrapper
-        anchors.top: headline.bottom
-        anchors.topMargin: 16
         width: parent.width
         height: searchInput.height
+        anchors.top: headline.bottom
+        anchors.topMargin: 16
+        anchors.right: parent.right
+        anchors.rightMargin: 8
 
-        Item {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.right: actionButton.left
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-            implicitHeight: searchInput.height
-            implicitWidth: searchInput.width
 
-            StatusBaseInput {
-                id: searchInput
-                implicitHeight: 36
-                width: parent.width
-                topPadding: 9
-                //% "Search"
-                placeholderText: qsTrId("search")
-                icon.name: "search"
-            }
-
+        StatusBaseInput {
+            id: searchInput
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            Layout.leftMargin: 17
+            implicitHeight: 36
+            topPadding: 9
+            //% "Search"
+            placeholderText: qsTrId("search")
+            icon.name: "search"
             MouseArea {
                 anchors.fill: parent
                 onClicked: root.openAppSearch()
             }
         }
 
-        StatusRoundButton {
-            id: actionButton
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 8
-            width: 32
-            height: 32
+        StatusIconTabButton {
+            icon.name: "public-chat"
+        }
 
-            type: StatusRoundButton.Type.Secondary
-            icon.name: "add"
-            state: "default"
-
+        StatusIconTabButton {
+            icon.name: "edit"
             onClicked: {
-                chatContextMenu.opened ?
-                    chatContextMenu.close() :
-                    chatContextMenu.popup(actionButton.width-chatContextMenu.width, actionButton.height + 4)
-            }
-            states: [
-                State {
-                    name: "default"
-                    PropertyChanges {
-                        target: actionButton
-                        icon.rotation: 0
-                        highlighted: false
-                    }
-                },
-                State {
-                    name: "pressed"
-                    PropertyChanges {
-                        target: actionButton
-                        icon.rotation: 45
-                        highlighted: true
-                    }
-                }
-            ]
-
-            transitions: [
-                Transition {
-                    from: "default"
-                    to: "pressed"
-
-                    RotationAnimation {
-                        duration: 150
-                        direction: RotationAnimation.Clockwise
-                        easing.type: Easing.InCubic
-                    }
-                },
-                Transition {
-                    from: "pressed"
-                    to: "default"
-                    RotationAnimation {
-                        duration: 150
-                        direction: RotationAnimation.Counterclockwise
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            ]
-
-            StatusPopupMenu {
-                id: chatContextMenu
-                closePolicy: Popup.CloseOnReleaseOutsideParent | Popup.CloseOnEscape
-
-                onOpened: {
-                    actionButton.state = "pressed"
-                }
-
-                onClosed: {
-                    actionButton.state = "default"
-                }
-
-                StatusMenuItem {
-                    //% "Start new chat"
-                    text: qsTrId("start-new-chat")
-                    icon.name: "private-chat"
-                    onTriggered: Global.openPopup(privateChatPopupComponent)
-                }
-
-                StatusMenuItem {
-                    //% "Start group chat"
-                    text: qsTrId("start-group-chat")
-                    icon.name: "group-chat"
-                    onTriggered: Global.openPopup(groupChatPopupComponent)
-                }
-
-                StatusMenuItem {
-                    //% "Join public chat"
-                    text: qsTrId("new-public-group-chat")
-                    icon.name: "public-chat"
-                    onTriggered: Global.openPopup(publicChatPopupComponent)
-                }
-
-                StatusMenuItem {
-                    //% "Communities"
-                    text: qsTrId("communities")
-                    icon.name: "communities"
-                    onTriggered: Global.openPopup(communitiesPopupComponent)
-                    enabled: localAccountSensitiveSettings.communitiesEnabled
-                }
+                root.store.openCreateChat = !root.store.openCreateChat;
             }
         }
     }
@@ -232,7 +136,10 @@ Item {
             id: channelList
 
             model: root.chatSectionModule.model
-            onChatItemSelected: root.chatSectionModule.setActiveItem(id, "")
+            onChatItemSelected: {
+                root.chatSectionModule.setActiveItem(id, "")
+                root.store.openCreateChat = false;
+            }
             onChatItemUnmuted: root.chatSectionModule.unmuteChat(id)
 
             popupMenu: ChatContextMenuView {
@@ -292,7 +199,9 @@ Item {
                 onDisplayProfilePopup: {
                     Global.openProfilePopup(publicKey)
                 }
-
+                onLeaveGroup: {
+                    chatSectionModule.leaveChat("", chatId, true);
+                }
                 onDisplayGroupInfoPopup: {
                     chatSectionModule.prepareChatContentModuleForChatId(chatId)
                     let chatContentModule = chatSectionModule.getChatContentModule()

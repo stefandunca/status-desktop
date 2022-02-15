@@ -176,8 +176,10 @@ Rectangle {
                 event.accepted = true
                 return;
             }
-            if(event) event.accepted = true
-            messageTooLongDialog.open()
+            if (event) {
+                event.accepted = true
+                messageTooLongDialog.open()
+            }
         }
 
         if (event.key === Qt.Key_Tab) {
