@@ -6,9 +6,7 @@
 #include "interfaces/controller_interface.h"
 #include "signals.h"
 
-namespace Modules
-{
-namespace Main
+namespace Modules::Main
 {
 
 class Controller : public QObject, IController
@@ -20,8 +18,7 @@ public:
     void init() override;
 };
 
-} // namespace Main
-} // namespace Modules
+} // namespace Modules::Main
 
 #endif // CONTROLLER_H
 

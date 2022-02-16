@@ -3,13 +3,7 @@
 
 #include <QString>
 
-namespace Modules
-{
-namespace Main
-{
-namespace Wallet
-{
-namespace Accounts
+namespace Modules::Main::Wallet::Accounts
 {
 class Item
 {
@@ -38,9 +32,6 @@ public:
     bool getIsChat();
     float getCurrencyBalance();
 };
-} // namespace Accounts
-} // namespace Wallet
-} // namespace Main
-} // namespace Modules
+} // namespace Modules::Main::Wallet::Accounts
 
 #endif // WALLET_ACCOUNT_ITEM_H

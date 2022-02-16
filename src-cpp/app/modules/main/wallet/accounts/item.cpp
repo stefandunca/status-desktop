@@ -1,12 +1,6 @@
 #include "item.h"
 
-namespace Modules
-{
-namespace Main
-{
-namespace Wallet
-{
-namespace Accounts
+namespace Modules::Main::Wallet::Accounts
 {
 Item::Item(QString name, QString address, QString path, QString color, QString publicKey, QString walletType, bool isWallet, bool isChat, float currencyBalance)
     : m_name(name),
@@ -65,7 +59,4 @@ float  Item::getCurrencyBalance()
     return m_currencyBalance;
 }
 
-} // namespace Accounts
-} // namespace Wallet
-} // namespace Main
-} // namespace Modules
+} // namespace Modules::Main::Wallet::Accounts
