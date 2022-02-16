@@ -11,9 +11,14 @@ Item {
     readonly property var searchMessages: Backpressure.debounce(searchPopup, 400, function (value) {
         appSearch.store.searchMessages(value)
     })
+    property alias opened: searchPopup.opened
 
     function openSearchPopup(){
         searchPopup.open()
+    }
+
+    function closeSearchPopup(){
+        searchPopup.close()
     }
 
     Connections {
@@ -126,7 +131,9 @@ Item {
         }
 
         onResultItemTitleClicked: {
-            return Global.openProfilePopup(titleId)
+            if (Utils.isChatKey(titleId)) {
+                Global.openProfilePopup(titleId)
+            }
         }
     }
 }
