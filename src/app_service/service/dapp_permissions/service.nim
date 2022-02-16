@@ -4,7 +4,7 @@ import result
 import options
 include ../../common/json_utils
 import service_interface
-import ../../../backend/permissions as status_go
+import ../../../backend/backend
 import dto/dapp
 import dto/permission
 export service_interface
@@ -27,7 +27,7 @@ proc newService*(): Service =
 
 method init*(self: Service) =
   try:
-    let response = status_go.getDappPermissions()
+    let response = backend.getDappPermissions()
     for dapp in response.result.getElems().mapIt(it.toDapp()):
       self.dapps[dapp.name] = dapp
   except Exception as e:
@@ -46,23 +46,28 @@ method clearPermissions*(self: Service, dapp: string): bool =
   try:
     if not self.dapps.hasKey(dapp):
       return
-    discard status_go.deleteDappPermissions(dapp)
+    discard backend.deleteDappPermissions(dapp)
     self.dapps.del(dapp)
     return true
   except Exception as e:
     let errDescription = e.msg
     error "error: ", errDescription
 
-method revoke*(self: Service, permission: Permission): bool =
+method revoke*(self: Service, permission: permission.Permission): bool =
   try:
     var dappsToDelete: seq[string] = @[]
     for dapp in self.dapps.mvalues:
       if dapp.permissions.contains(permission):
         dapp.permissions.excl(permission)
         if dapp.permissions.len > 0:
-          discard status_go.addDappPermissions(dapp.name, dapp.permissions.toSeq().mapIt($it))
+          discard backend.addDappPermissions(
+            backend.Permission(
+              dapp: dapp.name, 
+              permissions: dapp.permissions.toSeq().mapIt($it),
+            )
+          )
         else:
-          discard status_go.deleteDappPermissions(dapp.name)
+          discard backend.deleteDappPermissions(dapp.name)
           dappsToDelete.add(dapp.name)
     for dappName in dappsToDelete:
       self.dapps.del(dappName)
@@ -71,7 +76,7 @@ method revoke*(self: Service, permission: Permission): bool =
     let errDescription = e.msg
     error "error: ", errDescription
 
-method revoke*(self: Service, dapp: string, permission: Permission): bool =
+method revoke*(self: Service, dapp: string, permission: permission.Permission): bool =
   try:
     if not self.dapps.hasKey(dapp):
       return
@@ -79,25 +84,35 @@ method revoke*(self: Service, dapp: string, permission: Permission): bool =
     if self.dapps[dapp].permissions.contains(permission):
       self.dapps[dapp].permissions.excl(permission)
       if self.dapps[dapp].permissions.len > 0:
-        discard status_go.addDappPermissions(dapp, self.dapps[dapp].permissions.toSeq().mapIt($it))
+        discard backend.addDappPermissions(
+          backend.Permission(
+            dapp: dapp,
+            permissions: self.dapps[dapp].permissions.toSeq().mapIt($it)
+          )
+        )
       else:
-        discard status_go.deleteDappPermissions(dapp)
+        discard backend.deleteDappPermissions(dapp)
         self.dapps.del(dapp)
     return true
   except Exception as e:
     let errDescription = e.msg
     error "error: ", errDescription
 
-method addPermission*(self: Service, dapp: string, permission: Permission): R =
+method addPermission*(self: Service, dapp: string, p: permission.Permission): R =
   try:
     if not self.dapps.hasKey(dapp):
       self.dapps[dapp] = Dapp(
         name: dapp,
-        permissions: initHashSet[Permission]()
+        permissions: initHashSet[permission.Permission]()
       )
 
-    self.dapps[dapp].permissions.incl(permission)
-    discard status_go.addDappPermissions(dapp, self.dapps[dapp].permissions.toSeq().mapIt($it))
+    self.dapps[dapp].permissions.incl(p)
+    discard backend.addDappPermissions(
+      backend.Permission(
+        dapp: dapp,
+        permissions: self.dapps[dapp].permissions.toSeq().mapIt($it)
+      )
+    )
     result.ok self.dapps[dapp]
   except Exception as e:
     let errDescription = e.msg
@@ -107,14 +122,14 @@ method addPermission*(self: Service, dapp: string, permission: Permission): R =
 method revokeAllPermisions*(self: Service): bool =
   try:
     for d in self.dapps.values:
-      discard status_go.deleteDappPermissions(d.name)
+      discard backend.deleteDappPermissions(d.name)
     self.dapps.clear()
     return true
   except Exception as e:
     let errDescription = e.msg
     error "error: ", errDescription
 
-method hasPermission*(self: Service, dapp: string, permission: Permission): bool =
+method hasPermission*(self: Service, dapp: string, permission: permission.Permission): bool =
   if not self.dapps.hasKey(dapp):
     return false
   return self.dapps[dapp].permissions.contains(permission)

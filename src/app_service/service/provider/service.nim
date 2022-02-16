@@ -8,7 +8,7 @@ import ../ens/service as ens_service
 import ../settings/service_interface as settings_service
 import ../ens/utils as ens_utils
 import service_interface
-import ../../../backend/permissions as status_go_permissions
+import ../../../backend/backend as backend
 import ../../../backend/core as status_go_core
 import ../../../backend/eth as status_eth
 import ../../common/utils as status_utils
@@ -78,7 +78,9 @@ method init*(self: Service) =
   discard
 
 proc process(self: Service, data: Web3SendAsyncReadOnly): string =
-  if AUTH_METHODS.contains(data.payload.rpcMethod) and not self.dappPermissionsService.hasPermission(data.hostname, Permission.Web3):
+  if AUTH_METHODS.contains(data.payload.rpcMethod) and not self.dappPermissionsService.hasPermission(
+    data.hostname, dapp_permissions_service.Permission.Web3
+  ):
     return $ %* {
       "type": ResponseTypes.Web3SendAsyncCallback,
       "messageId": data.messageId,
@@ -241,11 +243,11 @@ proc process(self: Service, data: Web3SendAsyncReadOnly): string =
 
 proc process(self: Service, data: APIRequest): string =
   var value:JsonNode = case data.permission
-  of Permission.Web3: %* [self.settingsService.getDappsAddress()]
-  of Permission.ContactCode: %* self.settingsService.getPublicKey()
-  of Permission.Unknown: newJNull()
+  of dapp_permissions_service.Permission.Web3: %* [self.settingsService.getDappsAddress()]
+  of dapp_permissions_service.Permission.ContactCode: %* self.settingsService.getPublicKey()
+  of dapp_permissions_service.Permission.Unknown: newJNull()
 
-  let isAllowed = data.isAllowed and data.permission != Permission.Unknown
+  let isAllowed = data.isAllowed and data.permission != dapp_permissions_service.Permission.Unknown
 
   info "API request received", host=data.hostname, value=data.permission, isAllowed
 

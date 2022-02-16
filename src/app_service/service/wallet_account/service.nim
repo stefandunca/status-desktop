@@ -11,8 +11,7 @@ import ./service_interface, ./dto
 
 import ../../../app/core/eventemitter
 import ../../../backend/accounts as status_go_accounts
-import ../../../backend/tokens as status_go_tokens
-import ../../../backend/wallet as status_go_wallet
+import ../../../backend/backend as backend
 import ../../../backend/eth as status_go_eth
 
 export service_interface
@@ -179,7 +178,7 @@ method fetchBalances(self: Service, accounts: seq[string]): JsonNode =
   let visibleTokens = self.tokenService.getVisibleTokens()
   let tokens = visibleTokens.map(t => t.addressAsString())
   let chainIds = visibleTokens.map(t => t.chainId)
-  return status_go_tokens.getBalances(chainIds, accounts, tokens).result
+  return backend.getTokensBalancesForChainIDs(chainIds, accounts, tokens).result
 
 method refreshBalances(self: Service) =
   let prices = self.fetchPrices()
@@ -233,7 +232,7 @@ method addNewAccountToLocalStore(self: Service) =
 
 method generateNewAccount*(self: Service, password: string, accountName: string, color: string): string =
   try:
-    discard status_go_wallet.generateAccount(
+    discard backend.generateAccount(
       password,
       accountName,
       color)
@@ -244,7 +243,7 @@ method generateNewAccount*(self: Service, password: string, accountName: string,
 
 method addAccountsFromPrivateKey*(self: Service, privateKey: string, password: string, accountName: string, color: string): string =
   try:
-    discard status_go_wallet.addAccountWithPrivateKey(
+    discard backend.addAccountWithPrivateKey(
       privateKey,
       password,
       accountName,
@@ -257,7 +256,7 @@ method addAccountsFromPrivateKey*(self: Service, privateKey: string, password: s
 
 method addAccountsFromSeed*(self: Service, mnemonic: string, password: string, accountName: string, color: string): string =
   try:
-    discard status_go_wallet.addAccountWithMnemonic(
+    discard backend.addAccountWithMnemonic(
       mnemonic,
       password,
       accountName,
@@ -270,7 +269,7 @@ method addAccountsFromSeed*(self: Service, mnemonic: string, password: string, a
 
 method addWatchOnlyAccount*(self: Service, address: string, accountName: string, color: string): string =
   try:
-    discard status_go_wallet.addAccountWatch(
+    discard backend.addAccountWatch(
       address,
       accountName,
       color,

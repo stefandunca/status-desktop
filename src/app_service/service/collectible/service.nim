@@ -3,7 +3,7 @@ import chronicles, sequtils, json
 import ./service_interface, ./dto
 import ../settings/service_interface as settings_service
 
-import ../../../backend/collectibles as collectibles
+import ../../../backend/backend
 
 export service_interface
 
@@ -29,7 +29,7 @@ method init*(self: Service) =
 method getCollections(self: Service, address: string): seq[CollectionDto] =
   try:
     let networkId = self.settingsService.getCurrentNetworkId()
-    let response = collectibles.getOpenseaCollections(networkId, address)
+    let response = backend.getOpenseaCollectionsByOwner(networkId, address)
     return map(response.result.getElems(), proc(x: JsonNode): CollectionDto = x.toCollectionDto())
   except Exception as e:
     let errDesription = e.msg
@@ -39,7 +39,7 @@ method getCollections(self: Service, address: string): seq[CollectionDto] =
 method getCollectibles(self: Service, address: string, collectionSlug: string): seq[CollectibleDto] =
   try:
     let networkId = self.settingsService.getCurrentNetworkId()
-    let response = collectibles.getOpenseaAssets(networkId, address, collectionSlug, limit)
+    let response = backend.getOpenseaAssetsByOwnerAndCollection(networkId, address, collectionSlug, limit)
     return map(response.result.getElems(), proc(x: JsonNode): CollectibleDto = x.toCollectibleDto())
   except Exception as e:
     let errDesription = e.msg

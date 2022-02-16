@@ -7,7 +7,7 @@ import chronicles
 import sequtils
 
 import ../settings/service_interface as settings_service
-import ../../../backend/gif as status_gif
+import ../../../backend/backend
 import ./dto
 import ./service_interface
 
@@ -44,7 +44,7 @@ proc newService*(settingsService: settings_service.ServiceInterface): Service =
 
 proc setTenorAPIKey(self: Service) =
   try:
-    let response = status_gif.setTenorAPIKey(TENOR_API_KEY_RESOLVED)
+    let response = backend.setTenorAPIKey(TENOR_API_KEY_RESOLVED)
     if(not response.error.isNil):
       error "error setTenorAPIKey: ", errDescription = response.error.message
 
@@ -53,7 +53,7 @@ proc setTenorAPIKey(self: Service) =
 
 proc getRecentGifs(self: Service) =
   try:
-    let response = status_gif.getRecentGifs()
+    let response = backend.getRecentGifs()
 
     if(not response.error.isNil):
       error "error getRecentGifs: ", errDescription = response.error.message
@@ -65,7 +65,7 @@ proc getRecentGifs(self: Service) =
 
 proc getFavoriteGifs(self: Service) =
   try:
-    let response = status_gif.getFavoriteGifs()
+    let response = backend.getFavoriteGifs()
 
     if(not response.error.isNil):
       error "error getFavoriteGifs: ", errDescription = response.error.message
@@ -85,7 +85,7 @@ method init*(self: Service) =
 
 proc tenorQuery(self: Service, path: string): seq[GifDto] =
   try:
-    let response = status_gif.fetchGifs(path)
+    let response = backend.fetchGifs(path)
     let doc = response.result.str.parseJson()
 
     var items: seq[GifDto] = @[]
@@ -123,7 +123,7 @@ proc addToRecents*(self: Service, gifDto: GifDto) =
 
   self.recents = newRecents
   let recent = %*{"items": map(newRecents, toJsonNode)}
-  discard status_gif.updateRecentGifs(recent)
+  discard backend.updateRecentGifs(recent)
 
 proc getFavorites*(self: Service): seq[GifDto] =
   return self.favorites
@@ -150,4 +150,4 @@ proc toggleFavorite*(self: Service, gifDto: GifDto) =
 
   self.favorites = newFavorites
   let favorites = %*{"items": map(newFavorites, toJsonNode)}
-  discard status_gif.updateFavoriteGifs(favorites)
+  discard backend.updateFavoriteGifs(favorites)

@@ -3,7 +3,7 @@ import chronicles, sequtils, json
 import ./service_interface, ./dto
 
 import ../../../app/core/eventemitter
-import ../../../backend/saved_addresses as backend
+import ../../../backend/backend
 
 export service_interface
 
@@ -42,7 +42,7 @@ method getSavedAddresses(self: Service): seq[SavedAddressDto] =
 
 method createOrUpdateSavedAddress(self: Service, name, address: string) =
   try:
-    discard backend.addSavedAddress(name, address)
+    discard backend.addSavedAddress(backend.SavedAddress(name: name, address: address))
     var found = false
     for savedAddress in self.savedAddresses:
       if savedAddress.address == address:

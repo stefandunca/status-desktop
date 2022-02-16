@@ -3,7 +3,7 @@ import options
 
 
 import ../../../app/global/global_singleton
-import ../../../backend/network as status_network
+import ../../../backend/backend as backend
 import ../settings/service as settings_service
 import ./service_interface as network_interface
 
@@ -36,8 +36,7 @@ method getNetworks*(self: Service, useCached: bool = true): seq[NetworkDto] =
   if useCached and not cacheIsDirty:
     result = self.networks
   else:
-    let payload = %* [false]
-    let response = status_network.getNetworks(payload)
+    let response = backend.getEthereumChains(false)
     if not response.error.isNil:
       raise newException(Exception, "Error getting networks: " & response.error.message)
     result =  if response.result.isNil or response.result.kind == JNull: @[]
@@ -59,11 +58,11 @@ method getEnabledNetworks*(self: Service): seq[NetworkDto] =
       result.add(network)  
 
 method upsertNetwork*(self: Service, network: NetworkDto) =
-  discard status_network.upsertNetwork(network.toPayload())
+  discard backend.addEthereumChain(network.toPayload())
   self.dirty.store(true)
 
 method deleteNetwork*(self: Service, network: NetworkDto) =
-  discard status_network.deleteNetwork(%* [network.chainId])
+  discard backend.deleteEthereumChain(%* [network.chainId])
   self.dirty.store(true)
 
 method getNetwork*(self: Service, chainId: int): NetworkDto =

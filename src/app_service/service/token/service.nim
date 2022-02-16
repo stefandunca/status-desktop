@@ -4,7 +4,6 @@ from sugar import `=>`
 import web3/ethtypes
 from web3/conversions import `$`
 import ../../../backend/backend as backend
-import ../../../backend/tokens as token_backend
 
 import ../settings/service_interface as settings_service
 import ../network/service_interface as network_service
@@ -75,7 +74,7 @@ QtObject:
         if not activeTokenSymbols.hasKey(network.chainId):
           activeTokenSymbols[network.chainId] = DEFAULT_VISIBLE_TOKENS[network.chainId]
 
-        let responseTokens = token_backend.getTokens(network.chainId)
+        let responseTokens = backend.getTokens(network.chainId)
         let default_tokens = map(
           responseTokens.result.getElems(), 
           proc(x: JsonNode): TokenDto = x.toTokenDto(activeTokenSymbols[network.chainId], hasIcon=true, isCustom=false)

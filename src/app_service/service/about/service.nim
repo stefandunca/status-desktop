@@ -5,7 +5,7 @@ import ../../../app/core/tasks/[qt, threadpool]
 
 import ../settings/service as settings_service
 import ../network/types
-import ../../../backend/about as status_about
+import ../../../backend/backend
 import ./update
 
 include async_tasks
@@ -58,7 +58,7 @@ QtObject:
 
   proc getNodeVersion*(self: Service): string =
     try:
-      return status_about.getWeb3ClientVersion().result.getStr
+      return backend.clientVersion().result.getStr
     except Exception as e:
       error "Error getting Node version"
 
