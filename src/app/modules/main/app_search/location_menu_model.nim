@@ -33,6 +33,9 @@ QtObject:
   method rowCount(self: Model, index: QModelIndex = nil): int =
     return self.items.len
 
+  method len*(self: Model): int =
+    return self.items.len
+
   method roleNames(self: Model): Table[int, string] =
     {
       ModelRole.Value.int:"value",

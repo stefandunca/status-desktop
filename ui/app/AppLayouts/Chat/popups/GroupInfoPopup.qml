@@ -261,7 +261,7 @@ StatusModal {
                         }
                     }
                 ]
-                onTitleClicked:  {
+                onTitleClicked: {
                     Global.openProfilePopup(model.publicKey, popup)
                 }
             }

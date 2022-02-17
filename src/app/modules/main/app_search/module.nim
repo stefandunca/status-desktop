@@ -110,7 +110,8 @@ method prepareLocationMenuModel*(self: Module) =
   for c in communities:
     items.add(self.buildLocationMenuForCommunity(c))
 
-  self.view.locationMenuModel().setItems(items)
+  if (items.len != self.view.locationMenuModel().len):
+    self.view.locationMenuModel().setItems(items)
 
 method onActiveChatChange*(self: Module, sectionId: string, chatId: string) =
   self.controller.setActiveSectionIdAndChatId(sectionId, chatId)

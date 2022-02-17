@@ -129,11 +129,9 @@ Item {
             searchPopup.close()
             appSearch.store.resultItemClicked(itemId)
         }
-
-        onResultItemTitleClicked: {
-            if (Utils.isChatKey(titleId)) {
-                Global.openProfilePopup(titleId)
-            }
+        acceptsTitleClick: function (titleId) {
+            return Utils.isChatKey(titleId)
         }
+        onResultItemTitleClicked: Global.openProfilePopup(titleId)
     }
 }
