@@ -4,6 +4,8 @@ import QtQuick.Controls 2.14
 import QtQuick.Dialogs 1.3
 import QtGraphicalEffects 1.13
 
+import "CommunityEditSettingsPanel"
+
 import utils 1.0
 import shared.panels 1.0
 import shared.popups 1.0
@@ -14,6 +16,7 @@ import StatusQ.Layout 0.1
 import StatusQ.Components 0.1
 import StatusQ.Controls 0.1
 import StatusQ.Controls.Validators 0.1
+import StatusQ.Popups 0.1
 
 Flickable {
     id: root
@@ -87,12 +90,10 @@ Flickable {
         }
 
         ColumnLayout {
-            Layout.fillWidth: true
             spacing: 8
 
             StatusBaseText {
-                //% "Thumbnail image"
-                text: qsTrId("thumbnail-image")
+                text: qsTr("Community logo")
                 font.pixelSize: 15
                 color: Theme.palette.directColor1
             }
@@ -115,14 +116,14 @@ Flickable {
 
                     FileDialog {
                         id: imageDialog
-                        //% "Please choose an image"
-                        title: qsTrId("please-choose-an-image")
+                        title: qsTrId("Please choose an image")
                         folder: shortcuts.pictures
-                        nameFilters: [//% "Image files (*.jpg *.jpeg *.png)"
-                            qsTrId("image-files----jpg---jpeg---png-")]
+                        nameFilters: [qsTr("Image files (*.jpg *.jpeg *.png)")]
                         onAccepted: {
-                            addImageButton.selectedImage = imageDialog.fileUrls[0]
-                            imageCropperModal.open()
+                            if(imageDialog.fileUrls.length > 0) {
+                                addImageButton.selectedImage = imageDialog.fileUrls[0]
+                                imageCropperModal.open()
+                            }
                         }
                     }
 
@@ -153,30 +154,10 @@ Flickable {
                         }
                     }
 
-                    Item {
-                        id: addImageCenter
-                        visible: !imagePreview.visible
-                        width: uploadText.width
-                        height: childrenRect.height
+                    NoImageUploadedPanel {
                         anchors.centerIn: parent
 
-                        SVGImage {
-                            id: imageImg
-                            source: Style.svg("images_icon")
-                            width: 20
-                            height: 18
-                            anchors.horizontalCenter: parent.horizontalCenter
-                        }
-
-                        StatusBaseText {
-                            id: uploadText
-                            //% "Upload"
-                            text: qsTrId("upload")
-                            anchors.top: imageImg.bottom
-                            anchors.topMargin: 5
-                            font.pixelSize: 15
-                            color: Theme.palette.baseColor1
-                        }
+                        visible: !imagePreview.visible
                     }
 
                     StatusRoundButton {
@@ -202,6 +183,154 @@ Flickable {
                         ratio: "1:1"
                     }
                 }
+            }
+
+            // Banner
+            //
+            StatusBaseText {
+                text: qsTr("Community banner")
+
+                font.pixelSize: 15
+                color: Theme.palette.directColor1
+            }
+
+            StatusImageCropPanel {
+                id: bannerPreview
+
+                visible: !bannerEditor.visible
+
+                Layout.preferredWidth: 475
+                Layout.preferredHeight: Layout.preferredWidth / aspectRatio
+                Layout.alignment: Qt.AlignHCenter
+
+                interactive: false
+                wallColor: Theme.palette.statusAppLayout.backgroundColor
+                wallTransparency: 1
+
+                StatusRoundButton {
+                    id: editButton
+
+                    icon.name: "edit"
+
+                    // bottom-right corner
+                    x: bannerEditor.hasImage ? bannerPreview.cropWindow.x + bannerPreview.cropWindow.width - editButton.width/2 : 0
+                    y: bannerEditor.hasImage ? bannerPreview.cropWindow.y + bannerPreview.cropWindow.height - Style.current.smallPadding - editButton.height/2: 0
+
+                    highlighted: sensor.containsMouse
+                    type: StatusRoundButton.Type.Secondary
+
+                    onClicked: bannerFileDialog.open()
+                }
+            }
+
+            Rectangle {
+                id: bannerEditor
+
+                Layout.preferredWidth: 475
+                Layout.preferredHeight: 184
+                Layout.alignment: Qt.AlignHCenter
+
+                visible: !hasImage
+
+                radius: 10
+                color: Style.current.inputBackground
+
+                property bool hasImage: false
+
+                StatusRoundButton {
+                    id: addButton
+
+                    icon.name: "add"
+
+                    // top-right corner
+                    x: bannerEditor.width - Style.current.smallPadding - addButton.width/2
+                    y: Style.current.smallPadding - addButton.height/2
+
+                    highlighted: sensor.containsMouse
+                    type: StatusRoundButton.Type.Secondary
+
+                    onClicked: bannerFileDialog.open()
+                    z: bannerEditor.z + 1
+                }
+
+                NoImageUploadedPanel {
+                    anchors.centerIn: parent
+
+                    visible: !imagePreviewCropper.visible
+                    showARHint: true
+                }
+
+                FileDialog {
+                    id: bannerFileDialog
+
+                    title: qsTr("Choose an image for banner")
+                    folder: bannerEditor.hasImage ? imageCropping.source.substr(0, imageCropping.source.lastIndexOf("/")) : shortcuts.pictures
+                    nameFilters: [qsTr("Image files (*.jpg *.jpeg *.png *.tiff *.heif)")]
+                    onAccepted: {
+                        if(bannerFileDialog.fileUrls.length > 0) {
+                            imageCropping.source = bannerFileDialog.fileUrls[0]
+                            bannerCropperModal.open()
+                        }
+                    }
+                    onRejected: {
+                        if(bannerEditor.hasImage)
+                            bannerCropperModal.open()
+                    }
+                }
+
+                StatusModal {
+                    id: bannerCropperModal
+
+                    header.title: qsTr("Community banner")
+
+                    anchors.centerIn: Overlay.overlay
+
+                    Item {
+                        implicitWidth: 480
+                        implicitHeight: 350
+
+                        anchors.fill: parent
+
+                        ColumnLayout {
+                            anchors.fill: parent
+
+                            StatusImageCropPanel {
+                                id: imageCropping
+
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                                Layout.leftMargin: Style.current.padding * 2
+                                Layout.topMargin: Style.current.bigPadding
+                                Layout.rightMargin: Layout.leftMargin
+                                Layout.bottomMargin: Layout.topMargin
+
+                                aspectRatio: 380/111
+
+                                enableCheckers: true
+                            }
+                        }
+                    }
+
+                    rightButtons: [
+                        StatusButton {
+                            text: "Make this my Community banner"
+
+                            enabled: imageCropping.sourceSize.width > 0 && imageCropping.sourceSize.height > 0
+
+                            onClicked: {
+                                bannerCropperModal.close()
+                                bannerPreview.setCropRect(imageCropping.cropRect)
+                                bannerPreview.source = imageCropping.source
+                                bannerEditor.hasImage = true
+                            }
+                        }
+                    ]
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
             }
         }
 
