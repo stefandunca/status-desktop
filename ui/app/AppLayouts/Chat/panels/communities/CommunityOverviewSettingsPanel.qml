@@ -14,12 +14,12 @@ StackLayout {
 
     property string name
     property string description
-    property string image
+    property string logoImage
     property color color
     property bool editable: false
     property bool owned: false
 
-    signal edited(Item item) // item containing edited fields (name, description, image, color)
+    signal edited(Item item) // item containing edited fields (name, description, logoImage, color)
 
     clip: true
 
@@ -40,7 +40,7 @@ StackLayout {
                     icon {
                         width: 80
                         height: 80
-                        isLetterIdenticon: !root.image
+                        isLetterIdenticon: !root.logoImage
                         color: root.color
                         letterSize: width / 2.4
                     }
@@ -48,7 +48,7 @@ StackLayout {
                     image {
                         width: 80
                         height: 80
-                        source: root.image
+                        source: root.logoImage
                     }
                 }
 
@@ -123,15 +123,15 @@ StackLayout {
             name: root.name
             description: root.description
             color: root.color
-            image: root.image
+            logoImage: root.logoImage
 
             Component.onCompleted: {
                 editCommunityPage.dirty =
                         Qt.binding(() => {
-                                       return root.name != name ||
-                                              root.description != description ||
-                                              root.image != image ||
-                                              root.color != color
+                                       return root.name !== name ||
+                                              root.description !== description ||
+                                              root.logoImage !== logoImage ||
+                                              root.color !== color
                                    })
             }
         }

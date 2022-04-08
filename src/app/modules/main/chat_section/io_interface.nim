@@ -12,6 +12,8 @@ import model as chats_model
 
 import ../../../core/eventemitter
 
+from dto/cropped_image import CroppedImage
+
 type
   AccessInterface* {.pure inheritable.} = ref object of RootObj
 

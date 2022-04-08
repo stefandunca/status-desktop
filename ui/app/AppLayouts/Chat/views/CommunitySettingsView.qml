@@ -116,7 +116,7 @@ StatusAppTwoPanelLayout {
             CommunityOverviewSettingsPanel {
                 name: root.community.name
                 description: root.community.description
-                image: root.community.image
+                logoImage: root.community.logoImage
                 color: root.community.color
                 editable: root.community.amISectionAdmin
 
@@ -127,7 +127,7 @@ StatusAppTwoPanelLayout {
                             root.community.access,
                             false, // FIXME
                             item.color.toString().toUpperCase(),
-                            item.image === root.community.image ? "" : item.image,
+                            item.logoImage === root.community.logoImage ? "" : item.logoImage,
                             item.imageAx,
                             item.imageAy,
                             item.imageBx,

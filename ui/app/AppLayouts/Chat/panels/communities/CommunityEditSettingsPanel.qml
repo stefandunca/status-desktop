@@ -24,7 +24,7 @@ Flickable {
     property alias name: nameInput.text
     property alias description: descriptionTextInput.text
     property alias color: colorDialog.color
-    property alias image: addImageButton.selectedImage
+    property alias logoImage: addImageButton.selectedImage
     readonly property alias imageAx: imageCropperModal.aX
     readonly property alias imageAy: imageCropperModal.aY
     readonly property alias imageBx: imageCropperModal.bX
