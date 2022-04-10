@@ -565,6 +565,7 @@ QtObject:
       color: string,
       imageUrl: string,
       aX: int, aY: int, bX: int, bY: int,
+      bannerJsonStr: string,
       historyArchiveSupportEnabled: bool) =
     try:
       var image = singletonInstance.utils.formatImagePath(imageUrl)
@@ -577,6 +578,7 @@ QtObject:
         color,
         image,
         aX, aY, bX, bY,
+        bannerJsonStr,
         historyArchiveSupportEnabled)
 
       if response.error != nil:

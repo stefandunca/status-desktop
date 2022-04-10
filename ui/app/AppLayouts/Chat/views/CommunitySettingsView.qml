@@ -116,7 +116,7 @@ StatusAppTwoPanelLayout {
             CommunityOverviewSettingsPanel {
                 name: root.community.name
                 description: root.community.description
-                logoImage: root.community.logoImage
+                logoImage: root.community.image
                 color: root.community.color
                 editable: root.community.amISectionAdmin
 
@@ -132,6 +132,7 @@ StatusAppTwoPanelLayout {
                             item.imageAy,
                             item.imageBx,
                             item.imageBy,
+                            JSON.stringify({imagePath: item.bannerPath, cropRect: item.bannerCropRect})
                             )
                 }
             }

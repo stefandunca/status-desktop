@@ -12,8 +12,6 @@ import model as chats_model
 
 import ../../../core/eventemitter
 
-from dto/cropped_image import CroppedImage
-
 type
   AccessInterface* {.pure inheritable.} = ref object of RootObj
 
@@ -243,7 +241,7 @@ method removeUserFromCommunity*(self: AccessInterface, pubKey: string) {.base.} 
 method banUserFromCommunity*(self: AccessInterface, pubKey: string) {.base.} =
   raise newException(ValueError, "No implementation available")
 
-method editCommunity*(self: AccessInterface, name: string, description: string, access: int, ensOnly: bool, color: string, imagePath: string, aX: int, aY: int, bX: int, bY: int, historyArchiveSupportEnabled: bool) {.base.} =
+method editCommunity*(self: AccessInterface, name: string, description: string, access: int, ensOnly: bool, color: string, imagePath: string, aX: int, aY: int, bX: int, bY: int, bannerJsonData: string, historyArchiveSupportEnabled: bool) {.base.} =
   raise newException(ValueError, "No implementation available")
 
 method exportCommunity*(self: AccessInterface): string {.base.} =

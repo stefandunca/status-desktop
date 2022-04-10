@@ -15,6 +15,8 @@ StackLayout {
     property string name
     property string description
     property string logoImage
+    property url bannerPath
+    property rect bannerCropRect
     property color color
     property bool editable: false
     property bool owned: false
@@ -124,14 +126,18 @@ StackLayout {
             description: root.description
             color: root.color
             logoImage: root.logoImage
+            bannerPath: root.bannerPath
 
             Component.onCompleted: {
+                setBannerCropRect(root.bannerCropRect)
                 editCommunityPage.dirty =
                         Qt.binding(() => {
                                        return root.name !== name ||
                                               root.description !== description ||
                                               root.logoImage !== logoImage ||
-                                              root.color !== color
+                                              root.color !== color ||
+                                              root.bannerPath !== bannerPath ||
+                                              root.bannerCropRect !== bannerCropRect
                                    })
             }
         }

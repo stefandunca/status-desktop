@@ -29,6 +29,12 @@ Flickable {
     readonly property alias imageAy: imageCropperModal.aY
     readonly property alias imageBx: imageCropperModal.bX
     readonly property alias imageBy: imageCropperModal.bY
+    property alias bannerPath: bannerPreview.source
+    property alias bannerCropRect: bannerPreview.cropRect
+
+    function setBannerCropRect(newRect) {
+        bannerPreview.setCropRect(newRect)
+    }
 
     contentWidth: layout.width
     contentHeight: layout.height
@@ -256,7 +262,7 @@ Flickable {
                 NoImageUploadedPanel {
                     anchors.centerIn: parent
 
-                    visible: !imagePreviewCropper.visible
+                    visible: !bannerPreview.visible
                     showARHint: true
                 }
 
@@ -264,11 +270,11 @@ Flickable {
                     id: bannerFileDialog
 
                     title: qsTr("Choose an image for banner")
-                    folder: bannerEditor.hasImage ? imageCropping.source.substr(0, imageCropping.source.lastIndexOf("/")) : shortcuts.pictures
+                    folder: bannerEditor.hasImage ? bannerCropper.source.substr(0, bannerCropper.source.lastIndexOf("/")) : shortcuts.pictures
                     nameFilters: [qsTr("Image files (*.jpg *.jpeg *.png *.tiff *.heif)")]
                     onAccepted: {
                         if(bannerFileDialog.fileUrls.length > 0) {
-                            imageCropping.source = bannerFileDialog.fileUrls[0]
+                            bannerCropper.source = bannerFileDialog.fileUrls[0]
                             bannerCropperModal.open()
                         }
                     }
@@ -295,7 +301,7 @@ Flickable {
                             anchors.fill: parent
 
                             StatusImageCropPanel {
-                                id: imageCropping
+                                id: bannerCropper
 
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
@@ -316,12 +322,12 @@ Flickable {
                         StatusButton {
                             text: "Make this my Community banner"
 
-                            enabled: imageCropping.sourceSize.width > 0 && imageCropping.sourceSize.height > 0
+                            enabled: bannerCropper.sourceSize.width > 0 && bannerCropper.sourceSize.height > 0
 
                             onClicked: {
                                 bannerCropperModal.close()
-                                bannerPreview.setCropRect(imageCropping.cropRect)
-                                bannerPreview.source = imageCropping.source
+                                bannerPreview.setCropRect(bannerCropper.cropRect)
+                                bannerPreview.source = bannerCropper.source
                                 bannerEditor.hasImage = true
                             }
                         }

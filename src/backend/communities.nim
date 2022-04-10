@@ -2,6 +2,8 @@ import json, strutils
 import core, utils
 import response_type
 
+import interpret/cropped_image
+
 export response_type
 
 proc getJoinedComunities*(): RpcResponse[JsonNode] {.raises: [Exception].} =
@@ -66,8 +68,10 @@ proc editCommunity*(
     aY: int,
     bX: int,
     bY: int,
+    bannerJsonStr: string,
     historyArchiveSupportEnabled: bool
     ): RpcResponse[JsonNode] {.raises: [Exception].} =
+  let bannerImage = newCroppedImage(bannerJsonStr)
   result = callPrivateRPC("editCommunity".prefix, %*[{
     # TODO this will need to be renamed membership (small m)
     "CommunityID": communityId,
@@ -81,6 +85,7 @@ proc editCommunity*(
     "imageAy": aY,
     "imageBx": bX,
     "imageBy": bY,
+    "banner": bannerImage,
     "historyArchiveSupportEnabled": historyArchiveSupportEnabled
   }])
 
