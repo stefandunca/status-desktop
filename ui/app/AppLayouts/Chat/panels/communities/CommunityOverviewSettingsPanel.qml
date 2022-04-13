@@ -20,6 +20,8 @@ StackLayout {
     property color color
     property bool editable: false
     property bool owned: false
+    property bool isCommunityHistoryArchiveSupportEnabled: false
+    property bool communityHistoryArchiveSupportEnabled: false
 
     signal edited(Item item) // item containing edited fields (name, description, logoImage, color)
 
@@ -122,11 +124,19 @@ StackLayout {
         title: qsTr("Edit Community")
 
         content: CommunityEditSettingsPanel {
+            id: communityEditSettingsPanel
+
             name: root.name
             description: root.description
             color: root.color
             logoImage: root.logoImage
             bannerPath: root.bannerPath
+            isCommunityHistoryArchiveSupportEnabled: root.isCommunityHistoryArchiveSupportEnabled
+            Binding {
+                target: root
+                property: "isCommunityHistoryArchiveSupportEnabled"
+                value: isCommunityHistoryArchiveSupportEnabled
+            }
 
             Component.onCompleted: {
                 setBannerCropRect(root.bannerCropRect)

@@ -31,6 +31,8 @@ Flickable {
     readonly property alias imageBy: imageCropperModal.bY
     property alias bannerPath: bannerPreview.source
     property alias bannerCropRect: bannerPreview.cropRect
+    property bool isCommunityHistoryArchiveSupportEnabled: false
+    property alias communityHistoryArchiveSupportEnabled: historyArchiveSupportToggle.checked
 
     function setBannerCropRect(newRect) {
         bannerPreview.setCropRect(newRect)
@@ -376,6 +378,27 @@ Flickable {
                     onAccepted: colorSelected = true
                 }
             }
+        }
+
+        StatusListItem {
+            Layout.fillWidth: true
+
+            title: qsTrId("History Archive Support")
+
+            visible: root.isCommunityHistoryArchiveSupportEnabled
+
+            sensor.onClicked: {
+                if (root.isCommunityHistoryArchiveSupportEnabled) {
+                    historyArchiveSupportToggle.checked = !historyArchiveSupportToggle.checked
+                }
+            }
+
+            components: [
+                StatusSwitch {
+                    id: historyArchiveSupportToggle
+                    enabled: root.isCommunityHistoryArchiveSupportEnabled
+                }
+            ]
         }
 
         Item {

@@ -119,6 +119,8 @@ StatusAppTwoPanelLayout {
                 logoImage: root.community.image
                 color: root.community.color
                 editable: root.community.amISectionAdmin
+                isCommunityHistoryArchiveSupportEnabled: root.rootStore.isCommunityHistoryArchiveSupportEnabled
+                communityHistoryArchiveSupportEnabled: community.historyArchiveSupportEnabled
 
                 onEdited: {
                     root.chatCommunitySectionModule.editCommunity(
@@ -132,7 +134,8 @@ StatusAppTwoPanelLayout {
                             item.imageAy,
                             item.imageBx,
                             item.imageBy,
-                            JSON.stringify({imagePath: item.bannerPath, cropRect: item.bannerCropRect})
+                            JSON.stringify({imagePath: item.bannerPath, cropRect: item.bannerCropRect}),
+                            communityHistoryArchiveSupportEnabled
                             )
                 }
             }
