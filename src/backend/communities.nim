@@ -71,6 +71,7 @@ proc editCommunity*(
     bannerJsonStr: string,
     historyArchiveSupportEnabled: bool
     ): RpcResponse[JsonNode] {.raises: [Exception].} =
+  echo "@dd bannerJsonStr: ", bannerJsonStr
   let bannerImage = newCroppedImage(bannerJsonStr)
   result = callPrivateRPC("editCommunity".prefix, %*[{
     # TODO this will need to be renamed membership (small m)

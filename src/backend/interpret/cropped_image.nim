@@ -5,11 +5,11 @@ import json
     x, y, width, height: crop rectangle in image coordinates
 ]#
 type CroppedImage* = ref object
-    imagePath: string
-    x: int
-    y: int
-    width: int
-    height: int
+    imagePath*: string
+    x*: int
+    y*: int
+    width*: int
+    height*: int
 
 proc newCroppedImage*(jsonStr: string): CroppedImage =
     let rootNode = parseJson(jsonStr)

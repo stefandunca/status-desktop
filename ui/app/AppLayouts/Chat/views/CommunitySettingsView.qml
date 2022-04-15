@@ -134,7 +134,7 @@ StatusAppTwoPanelLayout {
                             item.imageAy,
                             item.imageBx,
                             item.imageBy,
-                            JSON.stringify({imagePath: item.bannerPath, cropRect: item.bannerCropRect}),
+                            JSON.stringify({imagePath: String(item.bannerPath).replace("file://", ""), cropRect: item.bannerCropRect}),
                             communityHistoryArchiveSupportEnabled
                             )
                 }

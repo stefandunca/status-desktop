@@ -29,6 +29,7 @@ proc fromEvent*(T: type MessageSignal, event: JsonNode): MessageSignal =
 
   if event["event"]{"contacts"} != nil:
     for jsonContact in event["event"]["contacts"]:
+      echo "@dd ContactEvent ", jsonContact
       signal.contacts.add(jsonContact.toContactsDto())
 
   if event["event"]{"messages"} != nil:
