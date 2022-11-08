@@ -2,7 +2,9 @@
 
 ## Developer instructions
 
-CMake
+### Running tests
+
+Using CMake
 
 ```sh
 cd ./tests/
@@ -11,11 +13,12 @@ cmake --build ./build/
 ctest --test-dir ./build/
 ```
 
-QtCreator
+Using QtCreator
 
-- Open the `./tests/CMakeLists.txt`
-- Choose a QT kit to run the tests
-- Set `%{sourceDir}/tests` as Working Directory for the TestStatusQ target
+- Open `./CMakeLists.txt`
+- Choose a QT kit to run the tests (e.g. `Desktop Qt 5.14.2 GCC 64bit`)
+  - If on apple silicon and using `Qt5.14` set `CMAKE_OSX_ARCHITECTURES` env var to `x86_64`
+- Set `%{sourceDir}/tests` as Working Directory for the `TestStatusQ` target
 - In the *Test Results* panel choose Run All Tests or just run the *TestStatusQ* target
 
 ## TODO
