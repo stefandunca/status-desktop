@@ -337,6 +337,7 @@ Item {
                         enabled: multiline
                     }
                     clip: true
+                    interactive: multiline
 
                     TextEdit {
                         id: edit
