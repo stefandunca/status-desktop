@@ -94,6 +94,12 @@ rpc(getWalletToken, "wallet"):
 rpc(startWallet, "wallet"):
   discard
 
+rpc(startBalanceHistory, "wallet"):
+  discard
+
+rpc(updateVisibleTokens, "wallet"):
+  symbols: seq[string]
+
 rpc(getTransactionEstimatedTime, "wallet"):
   chainId: int
   maxFeePerGas: float
@@ -279,8 +285,9 @@ rpc(getName, "ens"):
   address: string
 
 rpc(getBalanceHistory, "wallet"):
-  chainId: int
+  chainId: seq[int]
   address: string
+  currency: string
   timeInterval: int
 
 rpc(isCurrencyFiat, "wallet"):

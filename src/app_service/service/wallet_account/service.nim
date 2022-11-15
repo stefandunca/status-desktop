@@ -75,8 +75,6 @@ type AccountDeleted* = ref object of Args
 
 type CurrencyUpdated = ref object of Args
 
-type TokenVisibilityToggled = ref object of Args
-
 type NetwordkEnabledToggled = ref object of Args
 
 type WalletAccountUpdated* = ref object of Args
@@ -231,7 +229,7 @@ QtObject:
         of "wallet-tick-reload":
           self.buildAllTokens(self.getAddresses())
           self.checkRecentHistory()
-        
+
   proc getWalletAccount*(self: Service, accountIndex: int): WalletAccountDto =
     let accounts = self.getWalletAccounts()
     if accountIndex < 0 or accountIndex >= accounts.len:
@@ -249,11 +247,12 @@ QtObject:
       return
 
     discard backend.startWallet()
+    discard backend.startBalanceHistory()
 
   proc checkRecentHistory*(self: Service) =
     if(not singletonInstance.localAccountSensitiveSettings.getIsWalletEnabled()):
       return
-    
+
     try:
       let addresses = self.getWalletAccounts().map(a => a.address)
       let chainIds = self.networkService.getNetworks().map(a => a.chainId)
@@ -483,6 +482,9 @@ QtObject:
 
   proc onAllTokensBuilt*(self: Service, response: string) {.slot.} =
     try:
+      var visibleSymbols: seq[string]
+      let chainIds = self.networkService.getNetworks().map(n => n.chainId)
+
       let responseObj = response.parseJson
       var data = TokensPerAccountArgs()
       if responseObj.kind == JObject:
@@ -494,7 +496,13 @@ QtObject:
             data.accountsTokens[wAddress] = tokens
             self.storeTokensForAccount(wAddress, tokens)
             self.tokenService.updateTokenPrices(tokens) # For efficiency. Will be removed when token info fetching gets moved to the tokenService
+            # Gather symbol for visible tokens
+            for token in tokens:
+              if token.getVisibleForNetworkWithPositiveBalance(chainIds) and find(visibleSymbols, token.symbol) == -1:
+                visibleSymbols.add(token.symbol)
       self.events.emit(SIGNAL_WALLET_ACCOUNT_TOKENS_REBUILT, data)
+
+      discard backend.updateVisibleTokens(visibleSymbols)
     except Exception as e:
       error "error: ", procName="onAllTokensBuilt", errName = e.name, errDesription = e.msg
 
