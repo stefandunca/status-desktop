@@ -89,7 +89,7 @@ QtObject:
           return token
     except Exception as e:
       error "Error finding token by symbol", msg = e.msg
-    
+
   proc findTokenByAddress*(self: Service, network: NetworkDto, address: Address): TokenDto =
     for token in self.tokens[network.chainId]:
       if token.address == address:
@@ -122,7 +122,6 @@ QtObject:
     ))
 
   proc tokenBalanceHistoryDataResolved*(self: Service, response: string) {.slot.} =
-    # TODO
     let responseObj = response.parseJson
     if (responseObj.kind != JObject):
       info "blance history response is not a json object"
@@ -146,7 +145,7 @@ QtObject:
   proc fetchHistoricalBalanceForTokenAsJson*(self: Service, address: string, symbol: string, timeInterval: BalanceHistoryTimeInterval) =
     let networks = self.networkService.getNetworks()
     for network in networks:
-      if network.enabled and network.nativeCurrencySymbol == symbol:
+      if network.enabled:
         let arg = GetTokenBalanceHistoryDataTaskArg(
           tptr: cast[ByteAddress](getTokenBalanceHistoryDataTask),
           vptr: cast[ByteAddress](self.vptr),

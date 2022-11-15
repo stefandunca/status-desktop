@@ -20,7 +20,7 @@ import "../stores"
 Item {
     id: root
 
-    property var token
+    property var token: ""
     /*required*/ property string address: ""
 
     function createStore(address) {
@@ -30,8 +30,6 @@ Item {
     QtObject {
         id: d
         property var marketValueStore : RootStore.marketValueStore
-        // TODO: Should be temporary until non native tokens are supported by balance history
-        property bool isNativeToken: typeof token !== "undefined" && token ? token.symbol === "ETH" : false
     }
 
     Connections {
@@ -112,11 +110,7 @@ Item {
 
             graphsModel: [
                     {text: qsTr("Price"), enabled: true, id: AssetsDetailView.GraphType.Price},
-                    {
-                        text: qsTr("Balance"),
-                        enabled: false, // TODO: Enable after adding ECR20 token support and DB cache. Current prototype implementation works only for d.isNativeToken
-                        id: AssetsDetailView.GraphType.Balance
-                    },
+                    {text: qsTr("Balance"), enabled: true, id: AssetsDetailView.GraphType.Balance},
                 ]
             defaultTimeRangeIndexShown: ChartStoreBase.TimeRange.All
             timeRangeModel: dataReady() && selectedStore.timeRangeTabsModel
@@ -237,6 +231,7 @@ Item {
                 id: balanceStore
 
                 address: root.address
+                symbol: token.symbol
 
                 onNewDataReady: (timeRange) => {
                     let selectedTimeRange = timeRangeStrToEnum(graphDetail.selectedTimeRange)
