@@ -1,4 +1,4 @@
-import Tables, NimQml, sequtils, sugar
+import Tables, NimQml, sequtils, sugar, algorithm
 
 import ../../../../app_service/service/network/dto
 import ./io_interface
@@ -105,6 +105,12 @@ QtObject:
         balance,
       ))
 
+    # Sort the items by chainId
+    items.sort(proc (x, y: Item): auto =
+      cmp(x.getChainId(), y.getChainId()))
+    for item in items:
+      echo "@dd INT chainId: ", item.getChainId(), ", enabled: ", item.getIsEnabled()
+
     self.all.setItems(items)
     self.layer1.setItems(items.filter(i => i.getLayer() == 1))
     self.layer2.setItems(items.filter(i => i.getLayer() == 2))
@@ -117,8 +123,8 @@ QtObject:
 
     self.delegate.viewDidLoad()
 
-  proc toggleNetwork*(self: View, chainId: int) {.slot.} =
-    self.delegate.toggleNetwork(chainId)
+  proc setNetworkState*(self: View, chainId: int, enabled: bool) {.slot.} =
+    self.delegate.setNetworkState(chainId, enabled)
 
   proc toggleTestNetworksEnabled*(self: View) {.slot.} =
     self.delegate.toggleTestNetworksEnabled()

@@ -20,6 +20,8 @@ import "../controls"
 import "../stores"
 import ".."
 
+import AppLayouts.stores 1.0
+
 StatusDialog {
     id: root
 
@@ -295,23 +297,10 @@ StatusDialog {
     NetworkSelectPopup {
         id: networkSelectPopup
 
-        layer1Networks: SortFilterProxyModel {
-            sourceModel: allNetworksModelCopy
-            filters: ValueFilter {
-                roleName: "layer"
-                value: 1
-            }
-        }
-        layer2Networks: SortFilterProxyModel {
-            sourceModel: allNetworksModelCopy
-            filters: ValueFilter {
-                roleName: "layer"
-                value: 2
-            }
-        }
+        allAvailableNetworks: store.allNetworks
 
-        onToggleNetwork: {
-            network.isEnabled = !network.isEnabled
+        onToggleNetwork: (network, enabled) => {
+            network.isEnabled = enabled
             d.chainShortNamesDirty = true
         }
 
@@ -338,8 +327,17 @@ StatusDialog {
         }
     }
 
-    ListModel {
+    CloneModel {
         id: allNetworksModelCopy
+
+        sourceModel: store.allNetworks
+        roles: ["layer", "chainId", "chainColor", "chainName","shortName", "iconUrl"]
+        rolesOverride: [{
+            role: "isEnabled",
+            transform: (modelData) => Boolean(prefixStr.length > 0 && prefixStr.includes(modelData.shortName))
+        }]
+
+        readonly property var prefixStr: Utils.getChainsPrefix(address)
 
         function setEnabledNetworks(prefixArr) {
             networkSelector.blockModelUpdate(true)
@@ -349,26 +347,5 @@ StatusDialog {
             }
             networkSelector.blockModelUpdate(false)
         }
-
-        function init(model, address) {
-            const prefixStr = Utils.getChainsPrefix(address)
-            for (let i = 0; i < model.count; i++) {
-                const clonedItem = {
-                    layer: model.rowData(i, "layer"),
-                    chainId: model.rowData(i, "chainId"),
-                    chainColor: model.rowData(i, "chainColor"),
-                    chainName: model.rowData(i, "chainName"),
-                    shortName: model.rowData(i, "shortName"),
-                    iconUrl: model.rowData(i, "iconUrl"),
-                    isEnabled: Boolean(prefixStr.length > 0 && prefixStr.includes(shortName))
-                }
-
-                append(clonedItem)
-            }
-        }
-    }
-
-    Component.onCompleted: {
-        allNetworksModelCopy.init(store.allNetworks, root.address)
     }
 }

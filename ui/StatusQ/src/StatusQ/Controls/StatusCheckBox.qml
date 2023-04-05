@@ -49,8 +49,9 @@ CheckBox {
         x: !root.leftSide? root.rightPadding : root.leftPadding
         y: parent.height / 2 - height / 2
         radius: 2
-        color: (root.down || root.checked) ? Theme.palette.primaryColor1
-                                           : Theme.palette.directColor8
+        color: root.down || checkState !== Qt.Checked
+                    ? Theme.palette.directColor8
+                    : Theme.palette.primaryColor1
 
         StatusIcon {
             icon: "checkbox"
@@ -60,8 +61,8 @@ CheckBox {
                     ? d.indicatorIconHeightRegular : d.indicatorIconHeightSmall
             anchors.centerIn: parent
             anchors.horizontalCenterOffset: 1
-            color: Theme.palette.white
-            visible: root.down || root.checked
+            color: checkState === Qt.PartiallyChecked ? Theme.palette.directColor9 : Theme.palette.white
+            visible: root.down || checkState !== Qt.Unchecked
         }
     }
 

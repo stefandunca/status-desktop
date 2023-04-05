@@ -35,7 +35,7 @@ QtObject {
         filters: [
             ValueFilter {
                 roleName: "isTest"
-                value: networksModule.areTestNetworksEnabled
+                value: root.areTestNetworksEnabled
             }
         ]
     }
@@ -55,6 +55,7 @@ QtObject {
         return d.chainColors[chainShortName]
     }
 
+    property var areTestNetworksEnabled: networksModule.areTestNetworksEnabled
     property var layer1Networks: networksModule.layer1
     property var layer2Networks: networksModule.layer2
     property var testNetworks: networksModule.test
@@ -181,8 +182,8 @@ QtObject {
         return walletSectionSavedAddresses.deleteSavedAddress(address, ens)
     }
 
-    function toggleNetwork(chainId) {
-        networksModule.toggleNetwork(chainId)
+    function toggleNetwork(chainId, enabled) {
+        networksModule.setNetworkState(chainId, enabled)
     }
 
     function copyToClipboard(text) {

@@ -7,31 +7,50 @@ import StatusQ.Core 0.1
 import StatusQ.Core.Theme 0.1
 import StatusQ.Components 0.1
 import StatusQ.Controls 0.1
+import StatusQ.Popups 0.1
 
 import utils 1.0
 
-// TODO: replace with StatusModal
-Popup {
+import SortFilterProxyModel 0.2
+
+import "NetworkSelectPopup" as Internals
+
+StatusModal {
     id: root
+
     modal: false
+    padding: 4
+
     width: 360
     height: Math.min(432, scrollView.contentHeight + root.padding)
 
-    horizontalPadding: 5
-    verticalPadding: 5
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-    property var layer1Networks
-    property var layer2Networks
-    property var testNetworks
+    required property var allAvailableNetworks
+    required property var enabledNetworksModel
+    property alias areTestNetworksEnabled: controller.areTestNetworksEnabled
 
+    property bool canHaveEmptySelection: false
+
+
+    // TODO: remove this soon
     // If true NetworksExtraStoreProxy expected for layer1Networks and layer2Networks properties
     property bool useNetworksExtraStoreProxy: false
 
     property bool multiSelection: true
 
-    signal toggleNetwork(var network)
+    // TODO: rename toggle
+    signal toggleNetwork(var network, bool newState)
     signal singleNetworkSelected(int chainId, string chainName, string iconUrl)
+
+    Internals.Controller {
+        id: controller
+
+        allNetworksModel: root.allAvailableNetworks
+        enabledNetworksModel: root.enabledNetworksModel
+
+        onSetNetworkState: (modelData, newState) => root.toggleNetwork(modelData, newState)
+    }
 
     background: Rectangle {
         radius: Style.current.radius
@@ -50,6 +69,7 @@ Popup {
 
     contentItem: StatusScrollView {
         id: scrollView
+
         width: root.width
         height: root.height
         contentHeight: content.height
@@ -65,10 +85,12 @@ Popup {
 
             Repeater {
                 id: chainRepeater1
+
                 width: parent.width
                 height: parent.height
+
                 objectName: "networkSelectPopupChainRepeaterLayer1"
-                model: root.layer1Networks
+                model: controller.layer1Networks
 
                 delegate: chainItem
             }
@@ -87,15 +109,8 @@ Popup {
 
             Repeater {
                 id: chainRepeater2
-                model: root.layer2Networks
 
-                delegate: chainItem
-            }
-
-            Repeater {
-                id: chainRepeater3
-                model: root.testNetworks
-
+                model: controller.layer2Networks
                 delegate: chainItem
             }
         }
@@ -103,6 +118,7 @@ Popup {
 
     Component {
         id: chainItem
+
         StatusListItem {
             objectName: model.chainName
             implicitHeight: 48
@@ -128,14 +144,16 @@ Popup {
             components: [
                 StatusCheckBox {
                     id: checkBox
+                    tristate: true
                     visible: root.multiSelection
-                    checked: root.useNetworksExtraStoreProxy ? model.isActive : model.isEnabled
-                    onToggled: {
-                        if (root.useNetworksExtraStoreProxy) {
-                            toggleModelIsActive()
-                        } else {
-                            root.toggleNetwork(model)
-                        }
+
+                    // TODO: remove this soon
+                    //checked: root.useNetworksExtraStoreProxy ? model.isActive : model.isEnabled
+
+                    checkState: controller.uxStateToCheckState(model.enabledState)
+                    nextCheckState: () => {
+                        controller.setUserIntention(model.specialIndex)
+                        return Qt.PartiallyChecked
                     }
                 },
                 StatusRadioButton {

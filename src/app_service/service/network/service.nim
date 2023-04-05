@@ -91,10 +91,11 @@ proc getNetwork*(self: Service, networkType: NetworkType): NetworkDto =
   # Will be removed, this is used in case of legacy chain Id
   return NetworkDto(chainId: networkType.toChainId())
 
-proc toggleNetwork*(self: Service, chainId: int) =
+proc setNetworkState*(self: Service, chainId: int, enabled: bool) =
   let network = self.getNetwork(chainId)
 
-  network.enabled = not network.enabled
+  network.enabled = enabled
+  echo "@dd INT network.enabled: ", network.enabled, "; network.chainId: ", network.chainId
   self.upsertNetwork(network)
 
 proc getChainIdForEns*(self: Service): int =

@@ -132,10 +132,18 @@ QtObject:
       of "balance": result = $item.getBalance()
 
   proc setItems*(self: Model, items: seq[Item]) =
-    self.beginResetModel()
-    self.items = items
-    self.endResetModel()
-    self.countChanged()
+    # Act as a well behaved model
+    if self.items.len == items.len:
+      self.items = items
+      for i in 0 ..< items.len:
+        if items[i] notin self.items:
+          self.items[i] = items[i]
+          self.dataChanged(self.index(i, 0, nil), self.index(i, 0, nil), [])
+    else:
+      self.beginResetModel()
+      self.items = items
+      self.endResetModel()
+      self.countChanged()
 
   proc getChainColor*(self: Model, chainId: int): string {.slot.} =
     for item in self.items:

@@ -217,4 +217,8 @@ ListModel {
         title: "ProfileSocialLinksPanel"
         section: "Panels"
     }
+    ListElement {
+        title: "NetworkSelectPopup"
+        section: "Panels"
+    }
 }

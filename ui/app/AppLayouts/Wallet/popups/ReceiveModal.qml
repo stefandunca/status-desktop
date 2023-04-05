@@ -256,9 +256,8 @@ StatusModal {
             x: multiChainList.x + Style.current.xlPadding + Style.current.halfPadding
             y: centralLayout.y
 
-            layer1Networks: RootStore.layer1NetworksProxy
-            layer2Networks: RootStore.layer2NetworksProxy
-            testNetworks: RootStore.testNetworks
+            allAvailableNetworks: RootStore.allNetworks
+
             useNetworksExtraStoreProxy: true
 
             closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside

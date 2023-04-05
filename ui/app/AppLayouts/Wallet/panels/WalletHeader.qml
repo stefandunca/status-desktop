@@ -56,13 +56,15 @@ Item {
             id: networkFilter
             Layout.alignment: Qt.AlignTrailing
             Layout.rowSpan: 2
-            layer1Networks: walletStore.layer1Networks
-            layer2Networks: walletStore.layer2Networks
-            testNetworks: walletStore.testNetworks
-            enabledNetworks: walletStore.enabledNetworks
-            allNetworks: walletStore.allNetworks
 
-            onToggleNetwork: walletStore.toggleNetwork(chainId)
+            allNetworks: walletStore.allNetworks
+            enabledNetworks: walletStore.enabledNetworks
+            areTestNetworksEnabled: walletStore.areTestNetworksEnabled
+
+            onToggleNetwork: (chainId, enabled) => {
+                console.debug(`@dd INT COMMAND - ${chainId}, ${enabled}`)
+                walletStore.toggleNetwork(chainId, enabled)
+            }
         }
 
         StatusAddressPanel {

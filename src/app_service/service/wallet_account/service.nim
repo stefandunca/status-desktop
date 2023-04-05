@@ -442,8 +442,8 @@ QtObject:
     self.buildAllTokens(self.getAddresses(), store = true)
     self.events.emit(SIGNAL_WALLET_ACCOUNT_CURRENCY_UPDATED, CurrencyUpdated())
 
-  proc toggleNetworkEnabled*(self: Service, chainId: int) =
-    self.networkService.toggleNetwork(chainId)
+  proc setNetworkState*(self: Service, chainId: int, enabled: bool) =
+    self.networkService.setNetworkState(chainId, enabled)
     self.events.emit(SIGNAL_WALLET_ACCOUNT_NETWORK_ENABLED_UPDATED, NetwordkEnabledToggled())
 
   method toggleTestNetworksEnabled*(self: Service) =

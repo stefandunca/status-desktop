@@ -16,15 +16,14 @@ Item {
     implicitWidth: 130
     implicitHeight: parent.height
 
-    property var layer1Networks
-    property var layer2Networks
-    property var testNetworks
-    property var enabledNetworks
-    property var allNetworks
+    required property var allNetworks
+    required property var enabledNetworks
+    property bool areTestNetworksEnabled: false
+
     property bool isChainVisible: true
     property bool multiSelection: true
 
-    signal toggleNetwork(int chainId)
+    signal toggleNetwork(int chainId, bool newState)
     signal singleNetworkSelected(int chainId, string chainName, string chainIcon)
 
     QtObject {
@@ -36,8 +35,10 @@ Item {
 
     Item {
         id: selectRectangleItem
+
         width: parent.width
         height: 56
+
         // FIXME this should be a (styled) ComboBox
         StatusListItem {
             implicitWidth: parent.width
@@ -66,12 +67,9 @@ Item {
                     color: Theme.palette.baseColor1
                 }
             ]
+
             onClicked: {
-                if (selectPopup.opened) {
-                    selectPopup.close();
-                } else {
-                    selectPopup.open();
-                }
+                selectPopupLoader.active = !selectPopupLoader.active
             }
         }
     }
@@ -94,23 +92,36 @@ Item {
         }
     }
 
-    NetworkSelectPopup {
-        id: selectPopup
-        x: (parent.width - width + 5)
-        y: (selectRectangleItem.height + 5)
-        layer1Networks: root.layer1Networks
-        layer2Networks: root.layer2Networks
-        testNetworks: root.testNetworks
-        multiSelection: root.multiSelection
+    Loader {
+        id: selectPopupLoader
 
-        onToggleNetwork: {
-            root.toggleNetwork(network.chainId)
+        active: false
+
+        sourceComponent: NetworkSelectPopup {
+            id: selectPopup
+
+            x: (parent.width - width + 5)
+            y: (selectRectangleItem.height + 5)
+
+            allAvailableNetworks: root.allNetworks
+            enabledNetworksModel: root.enabledNetworks
+            areTestNetworksEnabled: root.areTestNetworksEnabled
+
+            multiSelection: root.multiSelection
+
+            onToggleNetwork: (network, newState) => {
+                root.toggleNetwork(network.chainId, newState)
+            }
+
+            onSingleNetworkSelected: {
+                d.selectedChainName = chainName
+                d.selectedIconUrl = iconUrl
+                root.singleNetworkSelected(chainId, chainName, iconUrl)
+            }
+
+            onClosed: selectPopupLoader.active = false
         }
 
-        onSingleNetworkSelected: {
-            d.selectedChainName = chainName
-            d.selectedIconUrl = iconUrl
-            root.singleNetworkSelected(chainId, chainName, iconUrl)
-        }
+        onLoaded: item.open()
     }
 }
