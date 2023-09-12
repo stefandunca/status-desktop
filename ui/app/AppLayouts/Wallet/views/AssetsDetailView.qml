@@ -20,14 +20,45 @@ import shared.stores 1.0
 Item {
     id: root
 
+    required property TokenBalanceHistoryStore balanceStore
     property var token: ({})
     property var networkConnectionStore
-    /*required*/ property string address: ""
+    required property string address
     property bool assetsLoading: true
+
+    function updateToNewData() {
+        chart.updateToNewData()
+    }
+
+    onAddressChanged: updateBalanceStore()
+
+    function updateBalanceStore() {
+        if(graphDetailLoader.item) {
+            graphDetailLoader.item.updateBalanceStore()
+        }
+    }
 
     QtObject {
         id: d
         property var marketValueStore : RootStore.marketValueStore
+    }
+
+    Connections {
+        target: balanceStore
+        function onNewDataReady(address, tokenSymbol, currencySymbol, timeRange) {
+            if (!graphDetailLoader.item)
+                return
+            if (timeRange === timeRangeStrToEnum(graphDetailLoader.item.selectedTimeRange)) {
+                updateToNewData()
+            }
+        }
+    }
+
+    Connections {
+        target: token
+        function onSymbolChanged() {
+            updateBalanceStore()
+        }
     }
 
     Connections {
@@ -237,26 +268,6 @@ Item {
                 let currencySymbol = RootStore.currencyStore.currentCurrency
                 if(!balanceStore.hasData(root.address, token.symbol, currencySymbol, selectedTimeRangeEnum)) {
                     RootStore.fetchHistoricalBalanceForTokenAsJson(root.address, token.symbol, currencySymbol, selectedTimeRangeEnum)
-                }
-            }
-
-            TokenBalanceHistoryStore {
-                id: balanceStore
-
-                onNewDataReady: (address, tokenSymbol, currencySymbol, timeRange) => {
-                    if (timeRange === timeRangeStrToEnum(graphDetail.selectedTimeRange)) {
-                        chart.updateToNewData()
-                    }
-                }
-
-                Connections {
-                    target: root
-                    function onAddressChanged() { graphDetail.updateBalanceStore() }
-                }
-
-                Connections {
-                    target: token
-                    function onSymbolChanged() { graphDetail.updateBalanceStore() }
                 }
             }
         }

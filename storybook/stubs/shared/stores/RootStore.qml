@@ -28,4 +28,8 @@ QtObject {
     property var getChainShortNamesForSavedWalletAddress
     property var getGasEthValue
     property var getNetworkLayer
+
+    property var getNetworkIconUrl
+    property var getNetworkName
+    property var marketHistoryIsLoading
 }

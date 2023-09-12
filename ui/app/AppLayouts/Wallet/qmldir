@@ -3,3 +3,4 @@ WalletHeader 1.0 WalletHeader.qml
 CollectiblesView 1.0 CollectiblesView.qml
 WalletLayout 1.0 WalletLayout.qml
 singleton WalletUtils 1.0 WalletUtils.qml
+AssetsDetailView 1.0 views/AssetsDetailView.qml

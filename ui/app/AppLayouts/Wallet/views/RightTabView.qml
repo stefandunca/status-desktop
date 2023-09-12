@@ -171,6 +171,7 @@ Item {
             address: RootStore.overview.mixedcaseAddress
 
             networkConnectionStore: root.networkConnectionStore
+            balanceStore: TokenBalanceHistoryStore {}
 
             onVisibleChanged: {
                 if (!visible)
