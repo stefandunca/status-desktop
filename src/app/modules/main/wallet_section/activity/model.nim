@@ -129,6 +129,7 @@ QtObject:
     for i in countdown(self.entries.high, 0):
       for j in countdown(updates.high, 0):
         if sameIdentity(self.entries[i], updates[j]):
+          echo "@dd updating entry at: ", i, ", ", j, "; update", self.entries[i], "; with:", updates[j]
           if updates[j].nftName.isSome():
             self.entries[i].setNftName(updates[j].nftName.get())
           if updates[j].nftUrl.isSome():
@@ -147,7 +148,7 @@ QtObject:
       if e.getId() == txHash:
         return i
     return -1
-    
+
   proc refreshItemsContainingAddress*(self: Model, address: string) =
     for i in 0..self.entries.high:
       if cmpIgnoreCase(self.entries[i].getSender(), address) == 0 or

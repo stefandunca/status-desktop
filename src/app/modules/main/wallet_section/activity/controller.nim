@@ -253,6 +253,7 @@ QtObject:
     )
 
     self.eventsHandler.onFilteringUpdateDone(proc (jn: JsonNode) =
+      echo "@dd onFilteringUpdateDone: ", $jn
       if jn.kind != JArray:
         error "expected an array"
 
